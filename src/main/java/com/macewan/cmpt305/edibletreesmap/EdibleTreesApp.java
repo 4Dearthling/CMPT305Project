@@ -52,7 +52,11 @@ public class EdibleTreesApp extends Application {
      */
     private void initializeMap(StackPane stackPane) {
         // Set ArcGIS API key
-        String apiKey = "your_api_key";
+        String installPath = System.getProperty("user.home") + "/.arcgis/arcgis-runtime-sdk-java-200.6.0";
+        System.out.println("Setting ArcGIS install directory to: " + installPath);
+        ArcGISRuntimeEnvironment.setInstallDirectory(installPath);
+
+        String apiKey = "AAPTxy8BH1VEsoebNVZXo8HurBJUIX-g4NPhmB2onUVG1IsWiBuAWl4xRgjLspLOR_N_WrKZN7mTlUQfxRIWRCZ6dX6Pn2pN17bQ6y_QSLOACjM2yRy-uqPm-OIM8uqogSsPSTznK7Q2GIuh5M_KmQCEx4SVi-RnbPylh4K0LMgSW3gwzFICn8YkFZpzEG2WYV_1No-UPeJfh0TPBeHKg81cPJ6GOfO5CsO23ZdHmCOFqUY.AT1_5klIgjI6";
         ArcGISRuntimeEnvironment.setApiKey(apiKey);
 
         // Create a map with a streets basemap style
