@@ -24,6 +24,17 @@ public class EdibleTreesApp extends Application {
     private static final double EDMONTON_LONGITUDE = -113.4938;
     private static final double INITIAL_SCALE = 100000; // Scale for viewing Edmonton
 
+    /**
+     * Main method to launch the application
+     */
+    public static void main(String[] args) {
+
+        EdibleTreeDAO dao = new ApiCsvEtDAO("https://data.edmonton.ca/api/v3/views/eecg-fc54/query.csv");
+
+        dao.getById(385224);
+        Application.launch(args);
+    }
+
     @Override
     public void start(Stage stage) {
         // Set the title and size of the stage (window)
@@ -90,10 +101,5 @@ public class EdibleTreesApp extends Application {
         }
     }
 
-    /**
-     * Main method to launch the application
-     */
-    public static void main(String[] args) {
-        Application.launch(args);
-    }
+
 }
