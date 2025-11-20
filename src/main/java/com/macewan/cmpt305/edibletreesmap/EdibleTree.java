@@ -1,68 +1,44 @@
 package com.macewan.cmpt305.edibletreesmap;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EdibleTree {
     private String id;
-    private String neighborhoodName;
-    private String speciesBotanical;
-    private String speciesCommon;
-    private String Genus;
-    private String Species;
-    private String Cultivar;
-    private Integer diameterBreatHeight;
-    private Integer conditionPercent;
-    private Integer yearPlanted;
-    private String typeFruit;
-    private BigDecimal latitude;
-    private BigDecimal longitude;
 
 
-    public EdibleTree(String csv) {
 
+    public EdibleTree(String csvLine) {
+        this.addTree(csvLine);
 
+    }
+
+    public void addTree(String csvLine) {
+        String[] tokens = csvLine.split(",");
+        List<String> cleanedTokens = new ArrayList<>();
+        for (String token : tokens) {
+            cleanedTokens.add(token.replace("\"", ""));
+        }
+
+        PlantLocation location = new PlantLocation(cleanedTokens.get(1).isBlank() ? "" : cleanedTokens.get(1),
+                cleanedTokens.get(15).isBlank() ? BigDecimal.ZERO : new BigDecimal(cleanedTokens.get(15)),
+                cleanedTokens.get(16).isBlank() ? BigDecimal.ZERO : new BigDecimal(cleanedTokens.get(16)));
+
+        PlantBiology biology = new PlantBiology(cleanedTokens.get(3).isBlank() ? "" : cleanedTokens.get(3),
+                cleanedTokens.get(4).isBlank() ? "" : cleanedTokens.get(4),
+                cleanedTokens.get(5).isBlank() ? "" : cleanedTokens.get(5),
+                cleanedTokens.get(6).isBlank() ? "" : cleanedTokens.get(6),
+                cleanedTokens.get(7).isBlank() ? "" : cleanedTokens.get(7),
+                cleanedTokens.get(13).isBlank() ? "" : cleanedTokens.get(13));
+
+        PlantInfo info = new PlantInfo(cleanedTokens.get(8).isBlank() ? -1 : Integer.parseInt(cleanedTokens.get(8)),
+                cleanedTokens.get(9).isBlank() ? -1 : Integer.parseInt(cleanedTokens.get(9)),
+                cleanedTokens.get(10).isBlank() ? "" : cleanedTokens.get(10));
 
 
     }
     public String getId() {
         return id;
     }
-    public String getNeighborhoodName() {
-        return neighborhoodName;
-    }
-    public String getSpeciesBotanical() {
-        return speciesBotanical;
-    }
-    public String getSpeciesCommon() {
-        return speciesCommon;
-    }
-    public String getGenus() {
-        return Genus;
-    }
-    public String getSpecies() {
-        return Species;
-    }
-    public String getCultivar() {
-        return Cultivar;
-    }
-    public Integer getDiameterBreatHeight() {
-        return diameterBreatHeight;
-    }
-    public Integer getConditionPercent() {
-        return conditionPercent;
-    }
-    public Integer getYearPlanted() {
-        return yearPlanted;
-    }
-    public String getTypeFruit() {
-        return typeFruit;
-    }
-    public BigDecimal getLatitude() {
-        return latitude;
-    }
-    public BigDecimal getLongitude() {
-        return longitude;
-    }
-
-
 }
