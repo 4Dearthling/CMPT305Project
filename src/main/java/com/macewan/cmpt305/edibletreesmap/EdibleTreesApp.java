@@ -12,6 +12,9 @@ import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+import java.util.List;
+
 /**
  * Displays an interactive map of Edmonton
  */
@@ -23,6 +26,23 @@ public class EdibleTreesApp extends Application {
     private static final double EDMONTON_LATITUDE = 53.5461;
     private static final double EDMONTON_LONGITUDE = -113.4938;
     private static final double INITIAL_SCALE = 100000; // Scale for viewing Edmonton
+
+    /**
+     * Main method to launch the application
+     */
+    public static void main(String[] args) throws IOException, InterruptedException {
+
+        EdibleTreeDAO dao = new ApiCsvEtDAO("https://data.edmonton.ca/api/v3/views/eecg-fc54/query.csv");
+
+        EdibleTrees trees = new EdibleTrees(dao.getAll());
+        System.out.println(trees.getByNeighborhood("ALLENDALE"));
+        //System.out.println(trees.getByFruit("Acorn"));
+        //System.out.println(trees.getByGenus("Prunus"));
+        //System.out.println(trees.getBySpecies("Chokecherry"));
+
+
+        Application.launch(args);
+    }
 
     @Override
     public void start(Stage stage) {
@@ -90,10 +110,5 @@ public class EdibleTreesApp extends Application {
         }
     }
 
-    /**
-     * Main method to launch the application
-     */
-    public static void main(String[] args) {
-        Application.launch(args);
-    }
+
 }
