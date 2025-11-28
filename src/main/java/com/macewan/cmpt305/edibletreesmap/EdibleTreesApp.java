@@ -11,10 +11,19 @@ import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
 import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.scene.text.Font;
+
 import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
+import javafx.scene.control.Label;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Box;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+
 
 import java.io.IOException;
 import java.util.List;
@@ -38,7 +47,7 @@ public class EdibleTreesApp extends Application {
      */
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        loadData();
+        //loadData();
         Application.launch(args);
     }
 
@@ -59,26 +68,66 @@ public class EdibleTreesApp extends Application {
         stage.setWidth(1200);
         stage.setHeight(800);
 
-        // Create a StackPane as the root layout
-        StackPane stackPane = new StackPane();
+        // Initialize the map view
+        initializeMap();
 
-        // Create the scene
-        Scene scene = new Scene(stackPane);
+        // Create Label
+        final Label label = new Label("Edmonton Edible Trees");
+        label.setStyle("-fx-font-size: 18px;");
+        label.setFont(Font.font("System",18));
+        label.setStyle("-fx-font-weight: 800;");
+
+
+        // Add control panel
+        VBox sidePane = getVBox();
+        sidePane.getChildren().add(title());
+
+        // Create UI with Map and Side Panel side by side
+        HBox mainPane = new HBox();
+        mainPane.getChildren().addAll(mapView, sidePane);
+
+        // Allow mapView to expand as needed
+        HBox.setHgrow(mapView, Priority.ALWAYS);
+        HBox.setHgrow(sidePane, Priority.ALWAYS);
 
         // Set the scene to the stage
+        Scene scene = new Scene(mainPane);
         stage.setScene(scene);
 
         // Show the stage
         stage.show();
 
-        // Initialize the map view
-        initializeMap(stackPane);
+
     }
+    private static Label title(){
+        // Create Label
+        final Label label = new Label("Edmonton Edible Trees");
+        label.setStyle("-fx-font-size: 18px;");
+        label.setFont(Font.font("System",18));
+        label.setStyle("-fx-font-weight: 800;");
+        return label;
+    }
+    private static VBox getVBox() {
+        // Create a DropShadow effect
+        DropShadow dropShadow = new DropShadow();
+        dropShadow.setColor(Color.BLACK); // Set the shadow color
+        dropShadow.setRadius(10.0);       // Set the blur radius
+        dropShadow.setOffsetX(5.0);       // Positive value shifts the shadow to the right
+        dropShadow.setOffsetY(0.0);
+
+        VBox sidePane = new VBox(10);
+        sidePane.setPadding(new Insets(10));
+        sidePane.setBackground(new Background(new BackgroundFill(Color.LIGHTSKYBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
+        sidePane.setPrefWidth(350);
+        sidePane.setEffect(dropShadow);
+        return sidePane;
+    }
+
 
     /**
      * Initialize the map view with Edmonton centered
      */
-    private void initializeMap(StackPane stackPane) {
+    private void initializeMap() {
         // Set ArcGIS API key
         String installPath = System.getProperty("user.home") + "/.arcgis/arcgis-runtime-sdk-java-200.6.0";
         System.out.println("Setting ArcGIS install directory to: " + installPath);
@@ -107,10 +156,9 @@ public class EdibleTreesApp extends Application {
         // Create graphics overlay to draw on map
         graphicsOverlay = new GraphicsOverlay();
         mapView.getGraphicsOverlays().add(graphicsOverlay);
-        drawTree(edibleTrees);
+        //drawTree(edibleTrees);
 
-        // Add the map view to the stack pane
-        stackPane.getChildren().add(mapView);
+
 
     }
 
