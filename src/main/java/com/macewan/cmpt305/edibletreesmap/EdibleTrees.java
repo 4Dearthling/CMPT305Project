@@ -46,6 +46,15 @@ public class EdibleTrees {
                 .filter(tree -> fruit.equals(tree.getPlantBiology().getTypeFruit()))
                 .toList();
     }
+    public List<String> getNeighborhoodNames() {
+        return trees.stream()
+                .map(tree -> tree.getPlantLocation().getNeighborhoodName())
+                .collect(Collectors.toSet())
+                .stream()
+                .toList();
+
+    }
+
 
 
 }
