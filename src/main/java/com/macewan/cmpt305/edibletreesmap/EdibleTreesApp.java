@@ -6,10 +6,14 @@ import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.BasemapStyle;
 import com.esri.arcgisruntime.mapping.Viewpoint;
+import com.esri.arcgisruntime.mapping.view.Graphic;
+import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.MapView;
+import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -21,6 +25,8 @@ import java.util.List;
 public class EdibleTreesApp extends Application {
 
     private MapView mapView;
+    private GraphicsOverlay graphicsOverlay;
+    private static EdibleTrees edibleTrees;
 
     // Edmonton coordinates (City Centre)
     private static final double EDMONTON_LATITUDE = 53.5461;
@@ -32,16 +38,18 @@ public class EdibleTreesApp extends Application {
      */
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        EdibleTreeDAO dao = new ApiCsvEtDAO("https://data.edmonton.ca/api/v3/views/eecg-fc54/query.csv");
-
-        EdibleTrees trees = new EdibleTrees(dao.getAll());
-        System.out.println(trees.getByNeighborhood("ALLENDALE"));
-        //System.out.println(trees.getByFruit("Acorn"));
-        //System.out.println(trees.getByGenus("Prunus"));
-        //System.out.println(trees.getBySpecies("Chokecherry"));
-
-
+        loadData();
         Application.launch(args);
+    }
+
+    public static void loadData() throws IOException {
+        try{
+            EdibleTreeDAO dao = new ApiCsvEtDAO("https://data.edmonton.ca/api/v3/views/eecg-fc54/query.csv");
+
+            edibleTrees = new EdibleTrees(dao.getAll());
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -96,8 +104,14 @@ public class EdibleTreesApp extends Application {
         // Set the viewpoint to center on Edmonton
         mapView.setViewpoint(new Viewpoint(edmontonPoint, INITIAL_SCALE));
 
+        // Create graphics overlay to draw on map
+        graphicsOverlay = new GraphicsOverlay();
+        mapView.getGraphicsOverlays().add(graphicsOverlay);
+        drawTree(edibleTrees);
+
         // Add the map view to the stack pane
         stackPane.getChildren().add(mapView);
+
     }
 
     /**
@@ -108,6 +122,17 @@ public class EdibleTreesApp extends Application {
         if (mapView != null) {
             mapView.dispose();
         }
+    }
+
+    private void drawTree(EdibleTrees edibleTrees) {
+        SimpleMarkerSymbol simpleMarkerSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.CIRCLE, Color.GREEN, 10);
+        List<EdibleTree> trees = edibleTrees.getTrees();
+        for (EdibleTree tree : trees) {
+            Graphic graphic = new Graphic(tree.getPlantLocation().getPoint(), simpleMarkerSymbol);
+            graphicsOverlay.getGraphics().add(graphic);
+        }
+
+
     }
 
 

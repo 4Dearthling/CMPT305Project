@@ -1,5 +1,8 @@
 package com.macewan.cmpt305.edibletreesmap;
 
+import com.esri.arcgisruntime.geometry.Point;
+import com.esri.arcgisruntime.geometry.SpatialReferences;
+
 import java.math.BigDecimal;
 
 public class PlantLocation {
@@ -20,6 +23,12 @@ public class PlantLocation {
     }
     public BigDecimal getLongitude() {
         return longitude;
+    }
+    public Point getPoint() {
+        return new Point(
+                this.getLongitude().doubleValue(),
+                this.getLatitude().doubleValue(),
+                SpatialReferences.getWgs84());
     }
 
 }
