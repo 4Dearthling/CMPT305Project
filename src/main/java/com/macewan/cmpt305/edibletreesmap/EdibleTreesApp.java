@@ -13,6 +13,9 @@ import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.text.Font;
+import javafx.scene.layout.VBox;
+import javafx.scene.control.CheckBox;
+
 
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -23,15 +26,34 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Box;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.scene.control.ScrollPane;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 
 import java.io.IOException;
 import java.util.List;
 
+
+
+
 /**
  * Displays an interactive map of Edmonton
  */
 public class EdibleTreesApp extends Application {
+    private CheckBox appleCheckBox;
+    private CheckBox cherryCheckBox;
+    private CheckBox crabappleCheckBox;
+    private CheckBox plumCheckBox;
+    private CheckBox pearCheckBox;
+    private CheckBox chokeCherryCheckBox;
+    private CheckBox acornCheckBox;
+    private CheckBox hawthornCheckBox;
+    private CheckBox juniperCheckBox;
+
+    private final java.util.Map<String, java.util.List<Graphic>> fruitGraphics = new java.util.HashMap<>();
+
 
     private MapView mapView;
     private GraphicsOverlay graphicsOverlay;
@@ -47,7 +69,7 @@ public class EdibleTreesApp extends Application {
      */
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        //loadData();
+        loadData();
         Application.launch(args);
     }
 
@@ -63,7 +85,7 @@ public class EdibleTreesApp extends Application {
 
     @Override
     public void start(Stage stage) {
-        // Set the title and size of the stage (window)
+
         stage.setTitle("Edmonton Edible Trees");
         stage.setWidth(1200);
         stage.setHeight(800);
@@ -80,9 +102,15 @@ public class EdibleTreesApp extends Application {
 
         // Add control panel
         VBox sidePane = getVBox();
-        sidePane.getChildren().add(title());
+        // Title
+        Label title = new Label("Edmonton Edible Trees");
+        title.setFont(Font.font("System", FontWeight.BOLD, 18));
 
-        // Create UI with Map and Side Panel side by side
+        // filter section
+        VBox filterBox = createFilterSection();
+        sidePane.getChildren().addAll(title, filterBox);
+
+        //side by side
         HBox mainPane = new HBox();
         mainPane.getChildren().addAll(mapView, sidePane);
 
@@ -96,34 +124,101 @@ public class EdibleTreesApp extends Application {
 
         // Show the stage
         stage.show();
-
-
     }
-    private static Label title(){
-        // Create Label
-        final Label label = new Label("Edmonton Edible Trees");
-        label.setStyle("-fx-font-size: 18px;");
-        label.setFont(Font.font("System",18));
-        label.setStyle("-fx-font-weight: 800;");
-        return label;
+    private VBox createFilterSection() {
+
+        //label for the filtering on side panel
+        Label label = new Label("Filter by Tree Type");
+        label.setFont(Font.font("System", FontWeight.BOLD, 16));
+
+        // use fields so other methods can see them
+        appleCheckBox = new CheckBox("Apple");
+        cherryCheckBox = new CheckBox("Cherry");
+        crabappleCheckBox = new CheckBox("Crabapple");
+        plumCheckBox = new CheckBox("Plum");
+        pearCheckBox = new CheckBox("Pear");
+        chokeCherryCheckBox = new CheckBox("Chokecherry");
+        acornCheckBox = new CheckBox("Acorn");
+        hawthornCheckBox = new CheckBox("Hawthorn");
+        juniperCheckBox = new CheckBox("Juniper");
+
+
+        appleCheckBox.setSelected(true);
+        cherryCheckBox.setSelected(true);
+        crabappleCheckBox.setSelected(true);
+        plumCheckBox.setSelected(true);
+        pearCheckBox.setSelected(true);
+        chokeCherryCheckBox.setSelected(true);
+        acornCheckBox.setSelected(true);
+        hawthornCheckBox.setSelected(true);
+        juniperCheckBox.setSelected(true);
+
+
+        // whenever any checkbox turns on  or off, update if it shows or not
+        appleCheckBox.selectedProperty().addListener((obs, o, n) -> updateFruitVisibility());
+        cherryCheckBox.selectedProperty().addListener((obs, o, n) -> updateFruitVisibility());
+        crabappleCheckBox.selectedProperty().addListener((obs, o, n) -> updateFruitVisibility());
+        plumCheckBox.selectedProperty().addListener((obs, o, n) -> updateFruitVisibility());
+        pearCheckBox.selectedProperty().addListener((obs, o, n) -> updateFruitVisibility());
+        chokeCherryCheckBox.selectedProperty().addListener((obs, o, n) -> updateFruitVisibility());
+        acornCheckBox.selectedProperty().addListener((obs, o, n) -> updateFruitVisibility());
+        hawthornCheckBox.selectedProperty().addListener((obs, o, n) -> updateFruitVisibility());
+        juniperCheckBox.selectedProperty().addListener((obs, o, n) -> updateFruitVisibility());
+
+        return new VBox(
+                10,
+                label,
+                appleCheckBox,
+                cherryCheckBox,
+                crabappleCheckBox,
+                plumCheckBox,
+                pearCheckBox,
+                chokeCherryCheckBox,
+                acornCheckBox,
+                hawthornCheckBox,
+                juniperCheckBox
+        );
     }
-    private static VBox getVBox() {
-        // Create a DropShadow effect
-        DropShadow dropShadow = new DropShadow();
-        dropShadow.setColor(Color.BLACK); // Set the shadow color
-        dropShadow.setRadius(10.0);       // Set the blur radius
-        dropShadow.setOffsetX(5.0);       // Positive value shifts the shadow to the right
-        dropShadow.setOffsetY(0.0);
+    private void updateFruitVisibility() {
+        if (fruitGraphics.isEmpty()) {
+            return;
+        }
 
-        VBox sidePane = new VBox(10);
-        sidePane.setPadding(new Insets(10));
-        sidePane.setBackground(new Background(new BackgroundFill(Color.LIGHTSKYBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
-        sidePane.setPrefWidth(350);
-        sidePane.setEffect(dropShadow);
-        return sidePane;
+        for (var entry : fruitGraphics.entrySet()) {
+            String key = entry.getKey();
+            boolean visible = isFruitEnabled(key);
+
+            for (Graphic g : entry.getValue()) {
+                g.setVisible(visible);
+            }
+        }
     }
 
+    /**
+     * Setting a sidebar for the filtering
+     */
+private static VBox getVBox() {
 
+    VBox container = new VBox(20); //creating side panel box
+    container.setPadding(new Insets(20));
+    container.setPrefWidth(350);
+
+    // setting colour to white
+    container.setBackground(
+            new Background(new BackgroundFill(Color.WHITE, new CornerRadii(15), Insets.EMPTY))
+    );
+
+    container.setBorder(
+            new Border(new BorderStroke(Color.LIGHTGRAY,
+                    BorderStrokeStyle.SOLID,
+                    new CornerRadii(15),
+                    new BorderWidths(1)))
+    );
+
+    container.setEffect(new DropShadow(10, Color.gray(0, 0.2)));
+
+    return container;
+}
     /**
      * Initialize the map view with Edmonton centered
      */
@@ -153,15 +248,11 @@ public class EdibleTreesApp extends Application {
         // Set the viewpoint to center on Edmonton
         mapView.setViewpoint(new Viewpoint(edmontonPoint, INITIAL_SCALE));
 
-        // Create graphics overlay to draw on map
         graphicsOverlay = new GraphicsOverlay();
         mapView.getGraphicsOverlays().add(graphicsOverlay);
-        //drawTree(edibleTrees);
-
-
+        drawTree(edibleTrees);
 
     }
-
     /**
      * Clean up resources when application is closed
      */
@@ -172,16 +263,74 @@ public class EdibleTreesApp extends Application {
         }
     }
 
-    private void drawTree(EdibleTrees edibleTrees) {
-        SimpleMarkerSymbol simpleMarkerSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.CIRCLE, Color.GREEN, 10);
-        List<EdibleTree> trees = edibleTrees.getTrees();
-        for (EdibleTree tree : trees) {
-            Graphic graphic = new Graphic(tree.getPlantLocation().getPoint(), simpleMarkerSymbol);
-            graphicsOverlay.getGraphics().add(graphic);
+
+    private Color getColorForFruit(String key) {
+        // key is lowercase
+        switch (key) {
+            case "apple":
+                return Color.RED;
+            case "cherry":
+                return Color.HOTPINK;
+            case "crabapple":
+                return Color.ORANGE;
+            case "plum":
+                return Color.PLUM;
+            case "pear":
+                return Color.LIMEGREEN;
+            case "chokecherry":
+                return Color.PURPLE;
+            case "acorn":
+                return Color.BROWN;
+            case "hawthorn":
+                return Color.LIGHTSKYBLUE;
+            case "juniper":
+                return Color.LIGHTYELLOW;
+            default:
+                return Color.GREEN;
         }
-
-
     }
 
+
+    private boolean isFruitEnabled(String key) {
+        key = key.toLowerCase();
+        return switch (key) {
+            case "apple"      -> appleCheckBox == null || appleCheckBox.isSelected();
+            case "cherry"     -> cherryCheckBox == null || cherryCheckBox.isSelected();
+            case "crabapple"  -> crabappleCheckBox == null || crabappleCheckBox.isSelected();
+            case "plum"       -> plumCheckBox == null || plumCheckBox.isSelected();
+            case "pear"       -> pearCheckBox == null || pearCheckBox.isSelected();
+            case "chokecherry"-> chokeCherryCheckBox == null || chokeCherryCheckBox.isSelected();
+            case "acorn"      -> acornCheckBox == null || acornCheckBox.isSelected();
+            case "hawthorn"   -> hawthornCheckBox == null || hawthornCheckBox.isSelected();
+            case "juniper"    -> juniperCheckBox == null || juniperCheckBox.isSelected();
+            default           -> true; // any other fruit type stays visible
+        };
+    }
+
+    private void drawTree(EdibleTrees edibleTrees) {
+        for (EdibleTree tree : edibleTrees.getTrees()) {
+            String fruitType = tree.getPlantBiology().getTypeFruit();
+            if (fruitType == null) {
+                fruitType = "";
+            }
+            String key = fruitType.trim().toLowerCase();
+
+            // picking a colour based on fruit type
+            Color color = getColorForFruit(key);
+            SimpleMarkerSymbol symbol =
+                    new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.CIRCLE, color, 10);
+
+            Graphic graphic = new Graphic(tree.getPlantLocation().getPoint(), symbol);
+
+            // add to overlay
+            graphicsOverlay.getGraphics().add(graphic);
+
+            //remember which graphics belong to which fruit
+            fruitGraphics
+                    .computeIfAbsent(key, k -> new java.util.ArrayList<>())
+                    .add(graphic);
+        }
+        updateFruitVisibility();
+    }
 
 }
