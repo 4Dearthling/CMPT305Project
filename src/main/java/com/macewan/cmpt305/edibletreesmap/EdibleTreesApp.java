@@ -15,25 +15,15 @@ import javafx.geometry.Insets;
 import javafx.scene.text.Font;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.CheckBox;
-
-
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Box;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import javafx.scene.control.ScrollPane;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
-
-
 import java.io.IOException;
-import java.util.List;
+
 
 
 
