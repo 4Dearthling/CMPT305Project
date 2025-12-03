@@ -1,13 +1,9 @@
 package com.macewan.cmpt305.edibletreesmap;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 
+import org.apache.commons.csv.CSVRecord;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import com.opencsv.CSVReader;
+
 
 
 public class EdibleTree {

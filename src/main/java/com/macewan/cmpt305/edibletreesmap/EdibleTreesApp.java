@@ -1,19 +1,23 @@
 package com.macewan.cmpt305.edibletreesmap;
 
 import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
+import com.esri.arcgisruntime.geometry.GeometryEngine;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.BasemapStyle;
 import com.esri.arcgisruntime.mapping.Viewpoint;
+import com.esri.arcgisruntime.mapping.view.Callout;
 import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -30,6 +34,9 @@ public class EdibleTreesApp extends Application {
     // Map components
     private MapView mapView;
     private GraphicsOverlay graphicsOverlay;
+    private Callout callout;
+    private TreeCluster cluster;
+    private List<TreeCluster> clusters;
 
     // Services
     private TreeClusteringScript clusteringScript;
@@ -95,6 +102,37 @@ public class EdibleTreesApp extends Application {
 
         // Load tree data in background
         loadTreeDataAsync();
+
+        // Callout Card
+        callout = mapView.getCallout();
+        calloutListener(callout);
+    }
+
+    // Create a listener to create a callout when a tree point is pressed
+    private void calloutListener(Callout callout) {
+        mapView.setOnMouseClicked(event -> {
+            // checks if there is no clustering, if the user click was from the primary mouse button and user is not panning
+            if (clusters.size() == edibleTrees.getSize() && event.getButton() == MouseButton.PRIMARY && event.isStillSincePress()) {
+
+                // Convert mouse click to usable point on mapView
+                Point2D mouseClick = new Point2D(event.getX(), event.getY());
+                Point mapPoint = mapView.screenToLocation(mouseClick);
+                Point projectedPoint = (Point) GeometryEngine.project(mapPoint, SpatialReferences.getWgs84());
+
+                // Gets tree closest to point clicked under a certain tolerance
+                EdibleTree clickedTree = edibleTrees.getTreeByPoint(projectedPoint);
+
+                // Create callout card
+                if (clickedTree != null) {
+                    callout.setCornerRadius(15);
+                    callout.setTitle("Fruit Tree");
+                    callout.setDetail(String.format("Fruit: %s%nSpecies: %s%nDiameter: %d%nCondition: %d%%",
+                            clickedTree.getPlantBiology().getTypeFruit(), clickedTree.getPlantBiology().getSpeciesCommon(),
+                            clickedTree.getPlantInfo().getDiameterBreastHeight(), clickedTree.getPlantInfo().getConditionPercent()));
+                    callout.showCalloutAt(clickedTree.getPlantLocation().getPoint());
+                }
+            }
+        });
     }
 
     /**
@@ -121,6 +159,8 @@ public class EdibleTreesApp extends Application {
         graphicsOverlay = new GraphicsOverlay();
         mapView.getGraphicsOverlays().add(graphicsOverlay);
     }
+
+
 
     /**
      * Creates the side panel with title and controls
@@ -192,7 +232,7 @@ public class EdibleTreesApp extends Application {
         double clusterDistance = clusteringScript.getClusterDistance(currentScale);
 
         // Cluster the trees
-        List<TreeCluster> clusters = clusteringScript.clusterTrees(
+        clusters = clusteringScript.clusterTrees(
                 edibleTrees.getTrees(),
                 clusterDistance
         );
