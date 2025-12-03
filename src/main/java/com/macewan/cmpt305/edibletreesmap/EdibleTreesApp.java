@@ -42,9 +42,14 @@ public class EdibleTreesApp extends Application {
     private CheckBox hawthornCheckBox;
     private CheckBox juniperCheckBox;
     private CheckBox butternutCheckBox;
+    private CheckBox saskatoonCheckbox;
+    private CheckBox russianOliveCheckbox;
+    private CheckBox coffeeTreeCheckBox;
+    private CheckBox walnutCheckBox;
+    private CheckBox hackberryCheckBox;
+    private CheckBox caraganaCheckBox;
 
     private final java.util.Map<String, java.util.List<Graphic>> fruitGraphics = new java.util.HashMap<>();
-
 
     private Label selectAllLabel;
     private Label selectNoneLabel;
@@ -159,6 +164,13 @@ public class EdibleTreesApp extends Application {
         hawthornCheckBox = new CheckBox("Hawthorn");
         juniperCheckBox = new CheckBox("Juniper");
         butternutCheckBox = new CheckBox("Butternut");
+        saskatoonCheckbox = new  CheckBox("Saskatoon");
+        russianOliveCheckbox = new CheckBox("Russian Olive");
+        coffeeTreeCheckBox = new CheckBox("Coffee Tree");
+        walnutCheckBox = new CheckBox("Walnut");
+        hackberryCheckBox = new CheckBox("Hackberry");
+        caraganaCheckBox =  new CheckBox("Caragana");
+
 
         appleCheckBox.setSelected(true);
         cherryCheckBox.setSelected(true);
@@ -170,6 +182,12 @@ public class EdibleTreesApp extends Application {
         hawthornCheckBox.setSelected(true);
         juniperCheckBox.setSelected(true);
         butternutCheckBox.setSelected(true);
+        saskatoonCheckbox.setSelected(true);
+        russianOliveCheckbox.setSelected(true);
+        coffeeTreeCheckBox.setSelected(true);
+        walnutCheckBox.setSelected(true);
+        hackberryCheckBox.setSelected(true);
+        caraganaCheckBox.setSelected(true);
 
         // whenever any checkbox turns on or off, update visibility and header state
         appleCheckBox.selectedProperty().addListener((obs, o, n) -> { updateFruitVisibility(); updateBulkSelectState(); });
@@ -182,6 +200,12 @@ public class EdibleTreesApp extends Application {
         hawthornCheckBox.selectedProperty().addListener((obs, o, n) -> { updateFruitVisibility(); updateBulkSelectState(); });
         juniperCheckBox.selectedProperty().addListener((obs, o, n) -> { updateFruitVisibility(); updateBulkSelectState(); });
         butternutCheckBox.selectedProperty().addListener((obs, o, n) -> { updateFruitVisibility(); updateBulkSelectState(); });
+        saskatoonCheckbox.selectedProperty().addListener((obs, o, n) -> { updateFruitVisibility(); updateBulkSelectState(); });
+        russianOliveCheckbox.selectedProperty().addListener((obs, o, n) -> { updateFruitVisibility(); updateBulkSelectState(); });
+        coffeeTreeCheckBox.selectedProperty().addListener((obs, o, n) -> { updateFruitVisibility(); updateBulkSelectState(); });
+        walnutCheckBox.selectedProperty().addListener((obs, o, n) -> updateFruitVisibility());
+        hackberryCheckBox.selectedProperty().addListener((obs, o, n) -> updateFruitVisibility());
+        caraganaCheckBox.selectedProperty().addListener((obs, o, n) -> updateFruitVisibility());
 
         VBox box = new VBox(
                 10,
@@ -195,7 +219,13 @@ public class EdibleTreesApp extends Application {
                 acornCheckBox,
                 hawthornCheckBox,
                 juniperCheckBox,
-                butternutCheckBox
+                butternutCheckBox,
+                saskatoonCheckbox,
+                russianOliveCheckbox,
+                coffeeTreeCheckBox,
+                walnutCheckBox,
+                hackberryCheckBox,
+                caraganaCheckBox
         );
 
         // initialize the Select all or Select none method
@@ -204,6 +234,12 @@ public class EdibleTreesApp extends Application {
     }
 
     private void setAllCheckBoxes(boolean value) {
+        selected(value, appleCheckBox, cherryCheckBox, crabappleCheckBox, plumCheckBox, pearCheckBox, chokeCherryCheckBox, acornCheckBox, hawthornCheckBox);
+        selected(value, juniperCheckBox, butternutCheckBox, saskatoonCheckbox, russianOliveCheckbox, coffeeTreeCheckBox, walnutCheckBox, hackberryCheckBox, caraganaCheckBox);
+
+    }
+
+    private void selected(boolean value, CheckBox appleCheckBox, CheckBox cherryCheckBox, CheckBox crabappleCheckBox, CheckBox plumCheckBox, CheckBox pearCheckBox, CheckBox chokeCherryCheckBox, CheckBox acornCheckBox, CheckBox hawthornCheckBox) {
         if (appleCheckBox != null)       appleCheckBox.setSelected(value);
         if (cherryCheckBox != null)      cherryCheckBox.setSelected(value);
         if (crabappleCheckBox != null)   crabappleCheckBox.setSelected(value);
@@ -212,8 +248,6 @@ public class EdibleTreesApp extends Application {
         if (chokeCherryCheckBox != null) chokeCherryCheckBox.setSelected(value);
         if (acornCheckBox != null)       acornCheckBox.setSelected(value);
         if (hawthornCheckBox != null)    hawthornCheckBox.setSelected(value);
-        if (juniperCheckBox != null)     juniperCheckBox.setSelected(value);
-        if (butternutCheckBox != null)   butternutCheckBox.setSelected(value);
     }
 
     private void updateBulkSelectState() {
@@ -229,7 +263,13 @@ public class EdibleTreesApp extends Application {
                         acornCheckBox.isSelected() &&
                         hawthornCheckBox.isSelected() &&
                         juniperCheckBox.isSelected() &&
-                        butternutCheckBox.isSelected();
+                        butternutCheckBox.isSelected() &&
+                        saskatoonCheckbox.isSelected() &&
+                        russianOliveCheckbox.isSelected() &&
+                        coffeeTreeCheckBox.isSelected() &&
+                        walnutCheckBox.isSelected() &&
+                        hackberryCheckBox.isSelected() &&
+                        caraganaCheckBox.isSelected();
 
         boolean noneSelected =
                 !appleCheckBox.isSelected() &&
@@ -241,7 +281,14 @@ public class EdibleTreesApp extends Application {
                         !acornCheckBox.isSelected() &&
                         !hawthornCheckBox.isSelected() &&
                         !juniperCheckBox.isSelected() &&
-                        !butternutCheckBox.isSelected();
+                        !butternutCheckBox.isSelected() &&
+                        !saskatoonCheckbox.isSelected() &&
+                        !russianOliveCheckbox.isSelected() &&
+                        !coffeeTreeCheckBox.isSelected() &&
+                        !walnutCheckBox.isSelected() &&
+                        !hackberryCheckBox.isSelected() &&
+                        !caraganaCheckBox.isSelected();
+
 
         setBulkSelectEnabled(selectAllLabel, !allSelected);
         setBulkSelectEnabled(selectNoneLabel, !noneSelected);
@@ -358,8 +405,14 @@ private static VBox getVBox() {
             case "chokecherry" -> Color.PURPLE;
             case "acorn" -> Color.BROWN;
             case "hawthorn" -> Color.LIGHTSKYBLUE;
-            case "juniper" -> Color.LIGHTYELLOW;
+            case "juniper" -> Color.GREENYELLOW;
             case "butternut" -> Color.GOLD;
+            case "saskatoon" -> Color.SALMON;
+            case "russian olive" -> Color.LAVENDER;
+            case "coffeetree pod" -> Color.GRAY;
+            case "walnut" -> Color.BLACK;
+            case "hackberry" -> Color.NAVY;
+            case "caragana flower/pod" -> Color.DARKGREEN;
             default -> Color.GREEN;
         };
     }
@@ -380,6 +433,12 @@ private static VBox getVBox() {
             case "hawthorn"   -> hawthornCheckBox == null || hawthornCheckBox.isSelected();
             case "juniper"    -> juniperCheckBox == null || juniperCheckBox.isSelected();
             case "butternut"  -> butternutCheckBox == null || butternutCheckBox.isSelected();
+            case "saskatoon"  -> saskatoonCheckbox == null || saskatoonCheckbox.isSelected();
+            case "russian olive" -> russianOliveCheckbox == null || russianOliveCheckbox.isSelected();
+            case "coffeetree pod" -> coffeeTreeCheckBox == null || coffeeTreeCheckBox.isSelected();
+            case "walnut" -> walnutCheckBox == null || walnutCheckBox.isSelected();
+            case "hackberry" -> hackberryCheckBox == null || hackberryCheckBox.isSelected();
+            case "caragana flower/pod" -> caraganaCheckBox == null || caraganaCheckBox.isSelected();
             default           -> true; // any other fruit type stays visible
         };
     }
