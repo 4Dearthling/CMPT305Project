@@ -41,6 +41,7 @@ public class EdibleTreesApp extends Application {
     // Services
     private TreeClusteringScript clusteringScript;
     private MapRenderer mapRenderer;
+    private MapInteractionHandler mapInteractionHandler;
 
     // Data
     private static EdibleTrees edibleTrees;
@@ -102,38 +103,8 @@ public class EdibleTreesApp extends Application {
 
         // Load tree data in background
         loadTreeDataAsync();
-
-        // Callout Card
-        callout = mapView.getCallout();
-        calloutListener(callout);
     }
 
-    // Create a listener to create a callout when a tree point is pressed
-    private void calloutListener(Callout callout) {
-        mapView.setOnMouseClicked(event -> {
-            // checks if there is no clustering, if the user click was from the primary mouse button and user is not panning
-            if (clusters.size() == edibleTrees.getSize() && event.getButton() == MouseButton.PRIMARY && event.isStillSincePress()) {
-
-                // Convert mouse click to usable point on mapView
-                Point2D mouseClick = new Point2D(event.getX(), event.getY());
-                Point mapPoint = mapView.screenToLocation(mouseClick);
-                Point projectedPoint = (Point) GeometryEngine.project(mapPoint, SpatialReferences.getWgs84());
-
-                // Gets tree closest to point clicked under a certain tolerance
-                EdibleTree clickedTree = edibleTrees.getTreeByPoint(projectedPoint);
-
-                // Create callout card
-                if (clickedTree != null) {
-                    callout.setCornerRadius(15);
-                    callout.setTitle("Fruit Tree");
-                    callout.setDetail(String.format("Fruit: %s%nSpecies: %s%nDiameter: %d%nCondition: %d%%",
-                            clickedTree.getPlantBiology().getTypeFruit(), clickedTree.getPlantBiology().getSpeciesCommon(),
-                            clickedTree.getPlantInfo().getDiameterBreastHeight(), clickedTree.getPlantInfo().getConditionPercent()));
-                    callout.showCalloutAt(clickedTree.getPlantLocation().getPoint());
-                }
-            }
-        });
-    }
 
     /**
      * Initializes the ArcGIS map view centered on Edmonton
@@ -210,6 +181,7 @@ public class EdibleTreesApp extends Application {
                 // Update map on JavaFX thread
                 javafx.application.Platform.runLater(() -> {
                     if (edibleTrees != null) {
+                        mapInteractionHandler = new MapInteractionHandler(mapView, edibleTrees);
                         refreshClusters();
                     }
                 });
@@ -242,6 +214,11 @@ public class EdibleTreesApp extends Application {
 
         // Update last scale
         lastScale = currentScale;
+
+        if (mapInteractionHandler != null) {
+            mapInteractionHandler.clearCallout();
+            mapInteractionHandler.setCluster(clusters);
+        }
 
         System.out.println("Refreshed clusters at scale " + currentScale +
                 " - showing " + clusters.size() + " clusters");
