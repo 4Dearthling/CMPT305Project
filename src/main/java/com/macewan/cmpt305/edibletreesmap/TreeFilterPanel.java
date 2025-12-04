@@ -1,6 +1,7 @@
 package com.macewan.cmpt305.edibletreesmap;
 
 import com.esri.arcgisruntime.mapping.view.Graphic;
+import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
 import javafx.geometry.Insets;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -10,6 +11,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -45,6 +47,9 @@ public class TreeFilterPanel extends VBox {
         buildUI();
         updateBulkSelectState();
     }
+
+
+
 
     private void buildUI() {
         // label for the filtering on side panel
