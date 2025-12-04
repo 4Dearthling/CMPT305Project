@@ -8,11 +8,15 @@ import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.BasemapStyle;
 import com.esri.arcgisruntime.mapping.Viewpoint;
 import com.esri.arcgisruntime.mapping.view.Callout;
+import com.esri.arcgisruntime.mapping.view.Graphic;
 import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.MapView;
+import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
+import javafx.scene.text.Font;
+import javafx.scene.layout.VBox;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -20,16 +24,21 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Main application class for the Edmonton Edible Trees interactive map.
  */
 public class EdibleTreesApp extends Application {
+
+    private final Map<String, List<Graphic>> fruitGraphics = new HashMap<>();
 
     // Map components
     private MapView mapView;
@@ -73,6 +82,7 @@ public class EdibleTreesApp extends Application {
 
     @Override
     public void start(Stage stage) {
+
         // Initialize services
         clusteringScript = new TreeClusteringScript();
 
@@ -87,10 +97,10 @@ public class EdibleTreesApp extends Application {
         // Initialize renderer (needs graphics overlay)
         mapRenderer = new MapRenderer(graphicsOverlay);
 
-        // Create UI components
+        // Add control panel
         VBox sidePane = createSidePanel();
-
-        // Layout: map on left, side panel on right
+        
+        //side by side
         HBox mainPane = new HBox();
         mainPane.getChildren().addAll(mapView, sidePane);
         HBox.setHgrow(mapView, Priority.ALWAYS);
@@ -100,9 +110,65 @@ public class EdibleTreesApp extends Application {
         Scene scene = new Scene(mainPane);
         stage.setScene(scene);
         stage.show();
-
+      
         // Load tree data in background
         loadTreeDataAsync();
+    
+    }
+  
+    private VBox createSidePanel() {
+        VBox sidePane = getVBox();
+
+        // Title
+        Label title = new Label("Edmonton Edible Trees");
+        title.setFont(Font.font("System", FontWeight.BOLD, 18));
+
+//         // Add drop shadow effect
+//         DropShadow dropShadow = new DropShadow();
+//         dropShadow.setColor(Color.BLACK);
+//         dropShadow.setRadius(10.0);
+//         dropShadow.setOffsetX(5.0);
+//         dropShadow.setOffsetY(0.0);
+//         sidePane.setEffect(dropShadow);
+      
+        // filter section (moved into TreeFilterPanel)
+        TreeFilterPanel filterBox = new TreeFilterPanel(fruitGraphics);
+
+        // Add refresh button
+        Button refreshButton = new Button("Refresh Clusters");
+        refreshButton.setStyle("-fx-font-size: 14px; -fx-padding: 10;");
+        refreshButton.setMaxWidth(Double.MAX_VALUE);
+        refreshButton.setOnAction(e -> refreshClusters());
+      
+        sidePane.getChildren().addAll(title, filterBox, refreshButton);
+
+        return sidePane;
+    }
+
+    /**
+     * Setting a sidebar for the filtering
+     */
+    private static VBox getVBox() {
+
+        VBox container = new VBox(20); //creating side panel box
+        container.setPadding(new Insets(20));
+        container.setPrefWidth(350);
+
+        // setting colour to white
+        container.setBackground(
+                new Background(new BackgroundFill(Color.WHITE, new CornerRadii(15), Insets.EMPTY))
+        );
+
+        container.setBorder(
+                new Border(new BorderStroke(Color.LIGHTGRAY,
+                        BorderStrokeStyle.SOLID,
+                        new CornerRadii(15),
+                        new BorderWidths(1)))
+        );
+
+        container.setEffect(new DropShadow(10, Color.gray(0, 0.2)));
+
+        return container;
     }
 
 
@@ -126,10 +192,8 @@ public class EdibleTreesApp extends Application {
         Point edmontonPoint = new Point(EDMONTON_LONGITUDE, EDMONTON_LATITUDE, SpatialReferences.getWgs84());
         mapView.setViewpoint(new Viewpoint(edmontonPoint, INITIAL_SCALE));
 
-        // Create graphics overlay for drawing
         graphicsOverlay = new GraphicsOverlay();
         mapView.getGraphicsOverlays().add(graphicsOverlay);
-    }
 
 
 
@@ -165,9 +229,7 @@ public class EdibleTreesApp extends Application {
         refreshButton.setOnAction(e -> refreshClusters());
         sidePane.getChildren().add(refreshButton);
 
-        return sidePane;
     }
-
     /**
      * Loads tree data asynchronously in a background thread
      */
@@ -192,7 +254,15 @@ public class EdibleTreesApp extends Application {
     }
 
     /**
-     * Refreshes the tree clusters on the map based on current zoom level
+     * Sets colours for each tree for distinction
+     */
+
+
+
+
+     
+    /**
+      * Refreshes the tree clusters on the map based on current zoom level
      */
     private void refreshClusters() {
         if (edibleTrees == null) {
@@ -210,7 +280,7 @@ public class EdibleTreesApp extends Application {
         );
 
         // Draw the clusters on the map
-        mapRenderer.drawClusters(clusters);
+        mapRenderer.drawClusters(clusters, fruitGraphics);
 
         // Update last scale
         lastScale = currentScale;
