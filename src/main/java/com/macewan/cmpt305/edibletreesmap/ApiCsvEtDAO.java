@@ -67,9 +67,9 @@ public class ApiCsvEtDAO implements EdibleTreeDAO{
                 for (CSVRecord record : parser) {
                     EdibleTree newTree = new EdibleTree(record);
                     results.add(newTree);
-                    System.out.println(record.toString());
+//                    System.out.println(record.toString());
                 }
-                System.out.println("Number of entries: " + results.size());
+//                System.out.println("Number of entries: " + results.size());
                 return results;
 
 

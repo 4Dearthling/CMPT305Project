@@ -6,20 +6,20 @@ import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.BasemapStyle;
 import com.esri.arcgisruntime.mapping.Viewpoint;
-import com.esri.arcgisruntime.mapping.view.Graphic;
 import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.MapView;
-import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.text.Font;
 import javafx.scene.layout.VBox;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -28,31 +28,41 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Displays an interactive map of Edmonton
+ * Main application class for the Edmonton Edible Trees interactive map.
  */
 public class EdibleTreesApp extends Application {
 
     private final Map<String, List<Graphic>> fruitGraphics = new HashMap<>();
 
+    // Map components
     private MapView mapView;
     private GraphicsOverlay graphicsOverlay;
+
+    // Services
+    private TreeClusteringScript clusteringScript;
+    private MapRenderer mapRenderer;
+
+    // Data
     private static EdibleTrees edibleTrees;
+    private double lastScale = -1;
 
     // Edmonton coordinates (City Centre)
     private static final double EDMONTON_LATITUDE = 53.5461;
     private static final double EDMONTON_LONGITUDE = -113.4938;
-    private static final double INITIAL_SCALE = 100000; // Scale for viewing Edmonton
+    private static final double INITIAL_SCALE = 100000;
 
     /**
      * Main method to launch the application
      */
-    public static void main(String[] args) throws IOException, InterruptedException {
-        loadData();
+    public static void main(String[] args) {
         Application.launch(args);
     }
 
+    /**
+     * Loads tree data from the Edmonton Open Data API
+     */
     public static void loadData() throws IOException {
-        try{
+        try {
             EdibleTreeDAO dao = new ApiCsvEtDAO("https://data.edmonton.ca/api/v3/views/eecg-fc54/query.csv");
             edibleTrees = new EdibleTrees(dao.getAll());
         } catch (InterruptedException e) {
@@ -63,44 +73,66 @@ public class EdibleTreesApp extends Application {
     @Override
     public void start(Stage stage) {
 
+        // Initialize services
+        clusteringScript = new TreeClusteringScript();
+
+        // Set up the window
         stage.setTitle("Edmonton Edible Trees");
         stage.setWidth(1200);
         stage.setHeight(800);
 
-        // Initialize the map view
+        // Initialize the map
         initializeMap();
 
-        // Create Label
-        final Label label = new Label("Edmonton Edible Trees");
-        label.setStyle("-fx-font-size: 18px;");
-        label.setFont(Font.font("System",18));
-        label.setStyle("-fx-font-weight: 800;");
-
+        // Initialize renderer (needs graphics overlay)
+        mapRenderer = new MapRenderer(graphicsOverlay);
 
         // Add control panel
+        VBox sidePane = createSidePanel();
+        
+        //side by side
+        HBox mainPane = new HBox();
+        mainPane.getChildren().addAll(mapView, sidePane);
+        HBox.setHgrow(mapView, Priority.ALWAYS);
+        HBox.setHgrow(sidePane, Priority.ALWAYS);
+
+        // Set up and show the scene
+        Scene scene = new Scene(mainPane);
+        stage.setScene(scene);
+        stage.show();
+      
+        // Load tree data in background
+        loadTreeDataAsync();
+    
+    }
+  
+    private VBox createSidePanel() {
         VBox sidePane = getVBox();
+
         // Title
         Label title = new Label("Edmonton Edible Trees");
         title.setFont(Font.font("System", FontWeight.BOLD, 18));
 
+//         // Add drop shadow effect
+//         DropShadow dropShadow = new DropShadow();
+//         dropShadow.setColor(Color.BLACK);
+//         dropShadow.setRadius(10.0);
+//         dropShadow.setOffsetX(5.0);
+//         dropShadow.setOffsetY(0.0);
+//         sidePane.setEffect(dropShadow);
+      
         // filter section (moved into TreeFilterPanel)
         TreeFilterPanel filterBox = new TreeFilterPanel(fruitGraphics);
-        sidePane.getChildren().addAll(title, filterBox);
 
-        //side by side
-        HBox mainPane = new HBox();
-        mainPane.getChildren().addAll(mapView, sidePane);
+        // Add refresh button
+        Button refreshButton = new Button("Refresh Clusters");
+        refreshButton.setStyle("-fx-font-size: 14px; -fx-padding: 10;");
+        refreshButton.setMaxWidth(Double.MAX_VALUE);
+        refreshButton.setOnAction(e -> refreshClusters());
+      
+        sidePane.getChildren().addAll(title, filterBox, refreshButton);
 
-        // Allow mapView to expand as needed
-        HBox.setHgrow(mapView, Priority.ALWAYS);
-        HBox.setHgrow(sidePane, Priority.ALWAYS);
-
-        // Set the scene to the stage
-        Scene scene = new Scene(mainPane);
-        stage.setScene(scene);
-
-        // Show the stage
-        stage.show();
+        return sidePane;
     }
 
     /**
@@ -130,47 +162,56 @@ public class EdibleTreesApp extends Application {
     }
 
     /**
-     * Initialize the map view with Edmonton centered
+     * Initializes the ArcGIS map view centered on Edmonton
      */
     private void initializeMap() {
-        // Set ArcGIS API key
+        // Set ArcGIS runtime environment
         String installPath = System.getProperty("user.home") + "/.arcgis/arcgis-runtime-sdk-java-200.6.0";
-        System.out.println("Setting ArcGIS install directory to: " + installPath);
         ArcGISRuntimeEnvironment.setInstallDirectory(installPath);
 
         String apiKey = "AAPTxy8BH1VEsoebNVZXo8HurBJUIX-g4NPhmB2onUVG1IsWiBuAWl4xRgjLspLOR_N_WrKZN7mTlUQfxRIWRCZ6dX6Pn2pN17bQ6y_QSLOACjM2yRy-uqPm-OIM8uqogSsPSTznK7Q2GIuh5M_KmQCEx4SVi-RnbPylh4K0LMgSW3gwzFICn8YkFZpzEG2WYV_1No-UPeJfh0TPBeHKg81cPJ6GOfO5CsO23ZdHmCOFqUY.AT1_5klIgjI6";
         ArcGISRuntimeEnvironment.setApiKey(apiKey);
 
-        // Create a map with a streets basemap style
+        // Create map with streets basemap
         ArcGISMap map = new ArcGISMap(BasemapStyle.ARCGIS_STREETS);
-
-        // Create a map view and set the map to it
         mapView = new MapView();
         mapView.setMap(map);
 
-        // Create a point for Edmonton city center
-        Point edmontonPoint = new Point(
-                EDMONTON_LONGITUDE,
-                EDMONTON_LATITUDE,
-                SpatialReferences.getWgs84()
-        );
-
-        // Set the viewpoint to center on Edmonton
+        // Center on Edmonton
+        Point edmontonPoint = new Point(EDMONTON_LONGITUDE, EDMONTON_LATITUDE, SpatialReferences.getWgs84());
         mapView.setViewpoint(new Viewpoint(edmontonPoint, INITIAL_SCALE));
 
         graphicsOverlay = new GraphicsOverlay();
         mapView.getGraphicsOverlays().add(graphicsOverlay);
-        drawTree(edibleTrees);
+
+        // Add refresh button
+        Button refreshButton = new Button("Refresh Clusters");
+        refreshButton.setStyle("-fx-font-size: 14px; -fx-padding: 10;");
+        refreshButton.setMaxWidth(Double.MAX_VALUE);
+        refreshButton.setOnAction(e -> refreshClusters());
+        sidePane.getChildren().add(refreshButton);
 
     }
     /**
-     * Clean up resources when application is closed
+     * Loads tree data asynchronously in a background thread
      */
-    @Override
-    public void stop() {
-        if (mapView != null) {
-            mapView.dispose();
-        }
+    private void loadTreeDataAsync() {
+        new Thread(() -> {
+            try {
+                System.out.println("Loading tree data...");
+                loadData();
+                System.out.println("Data loaded successfully: " + edibleTrees.getTrees().size() + " trees");
+
+                // Update map on JavaFX thread
+                javafx.application.Platform.runLater(() -> {
+                    if (edibleTrees != null) {
+                        refreshClusters();
+                    }
+                });
+            } catch (IOException e) {
+                System.err.println("Error loading data: " + e.getMessage());
+            }
+        }).start();
     }
 
     /**
@@ -224,4 +265,43 @@ public class EdibleTreesApp extends Application {
         }
     }
 
+
+     
+    /**
+      * Refreshes the tree clusters on the map based on current zoom level
+     */
+    private void refreshClusters() {
+        if (edibleTrees == null) {
+            return;
+        }
+
+        // Get current map scale to determine clustering level
+        double currentScale = mapView.getMapScale();
+        double clusterDistance = clusteringScript.getClusterDistance(currentScale);
+
+        // Cluster the trees
+        List<TreeCluster> clusters = clusteringScript.clusterTrees(
+                edibleTrees.getTrees(),
+                clusterDistance
+        );
+
+        // Draw the clusters on the map
+        mapRenderer.drawClusters(clusters);
+
+        // Update last scale
+        lastScale = currentScale;
+
+        System.out.println("Refreshed clusters at scale " + currentScale +
+                " - showing " + clusters.size() + " clusters");
+    }
+
+    /**
+     * Clean up resources when application closes
+     */
+    @Override
+    public void stop() {
+        if (mapView != null) {
+            mapView.dispose();
+        }
+    }
 }
