@@ -211,14 +211,6 @@ public class EdibleTreesApp extends Application {
     }
 
     /**
-     * Sets colours for each tree for distinction
-     */
-
-
-
-
-     
-    /**
       * Refreshes the tree clusters on the map based on current zoom level
      */
     private void refreshClusters() {

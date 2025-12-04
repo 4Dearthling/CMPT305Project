@@ -1,17 +1,14 @@
 package com.macewan.cmpt305.edibletreesmap;
 
 import com.esri.arcgisruntime.mapping.view.Graphic;
-import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
 import javafx.geometry.Insets;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,51 +34,92 @@ public class TreeFilterPanel extends VBox {
     private Label selectAllLabel;
     private Label selectNoneLabel;
 
+    // dropdown parts
+    private VBox dropdownContent;
+    private Label dropdownDisplay;
+    private Label dropdownArrow;
+
     // reference to fruitGraphics from the app
     private final Map<String, List<Graphic>> fruitGraphics;
 
+    /**
+     * Creates the tree filter panel that controls which fruit types
+     * are visible on the map.
+     *
+     * @param fruitGraphics - a map where each key represents a fruit type
+     *                      and each val is a list of graphics associated with that type.
+     */
     public TreeFilterPanel(Map<String, List<Graphic>> fruitGraphics) {
         super(10);
-        this.fruitGraphics = fruitGraphics;
-        setPadding(new Insets(0));
-        buildUI();
-        updateBulkSelectState();
+        this.fruitGraphics = fruitGraphics; // reference to the map of fruit-type graphic
+        setPadding(new Insets(10)); // add padding for cleaner look
+        buildUI(); // build the dropdown ui and the checkboxes
+        updateBulkSelectState(); // refresh the state of the "Select All" or "Select None" label
     }
 
-
-
-
+    /**
+     * Builds the UI for the dropdown, checkboxes and the select all or none labels
+     *
+     */
     private void buildUI() {
-        // label for the filtering on side panel
-        Label label = new Label("Filter by Tree Type");
-        label.setFont(Font.font("System", FontWeight.BOLD, 16));
 
-        // clickable bulk actions
+        // Title label like in the portal
+        Label title = new Label("Type of Edible Fruit");
+        title.setFont(Font.font("System", FontWeight.BOLD, 16));
+
+        // header of the dropdown
+        dropdownDisplay = new Label("Select…");
+        dropdownArrow = new Label("▼"); //taken from coolsymbol.top
+
+        //creating the dropdown for the filtered boxes.
+        HBox dropdownHeader = new HBox(10, dropdownDisplay, new Region(), dropdownArrow);
+        HBox.setHgrow(dropdownHeader.getChildren().get(1), Priority.ALWAYS);
+        dropdownHeader.setPadding(new Insets(6, 10, 6, 10));
+        dropdownHeader.setBorder(
+                new Border(new BorderStroke(
+                        Color.LIGHTGRAY,
+                        BorderStrokeStyle.SOLID,
+                        new CornerRadii(4),
+                        new BorderWidths(1)))
+        );
+        dropdownHeader.setBackground(
+                new Background(new BackgroundFill(Color.WHITE, new CornerRadii(4), Insets.EMPTY))
+        );
+
+        // when the header is clicked, toggle visibility of the dropdownContent
+        dropdownHeader.setOnMouseClicked(e -> toggleDropdown());
+
+        // checkboxes and to choose multiple or none
         selectAllLabel = new Label("Select All");
         selectNoneLabel = new Label("Select None");
 
-        // if select all is clicked
+        HBox bulkRow = new HBox(10, selectAllLabel, selectNoneLabel);
+        bulkRow.setPadding(new Insets(5, 0, 5, 0));
+
+        selectAllLabel.setTextFill(Color.DODGERBLUE);
+        selectNoneLabel.setTextFill(Color.DODGERBLUE);
+
+        // when select all is clicked it sets all the checkboxes to be checked
         selectAllLabel.setOnMouseClicked(e -> {
             if (!selectAllLabel.isDisabled()) {
-                setAllCheckBoxes(true); // check all boxes
+                setAllCheckBoxes(true);
                 updateFruitVisibility();
                 updateBulkSelectState();
+                updateDropdownDisplayText(); // the dropdown header will display the updated selection and will close
             }
         });
 
-        //if select none label is clicked
+        // if select none is clicked it sets all checkboxes to false (deselects them)
         selectNoneLabel.setOnMouseClicked(e -> {
             if (!selectNoneLabel.isDisabled()) {
-                setAllCheckBoxes(false); // uncheck all boxes
+                setAllCheckBoxes(false);
                 updateFruitVisibility();
-                updateBulkSelectState();
+                updateBulkSelectState(); //updates the selection status (No
+                updateDropdownDisplayText(); // updates the dropdown display to say how many are selected
             }
         });
 
-        // r
-        HBox headerRow = new HBox(10, label, selectAllLabel, selectNoneLabel);
-
-        // use fields so other methods can see them
+        // create all the checkboxes
         appleCheckBox = new CheckBox("Apple");
         cherryCheckBox = new CheckBox("Cherry");
         crabappleCheckBox = new CheckBox("Crabapple");
@@ -92,31 +130,18 @@ public class TreeFilterPanel extends VBox {
         hawthornCheckBox = new CheckBox("Hawthorn");
         juniperCheckBox = new CheckBox("Juniper");
         butternutCheckBox = new CheckBox("Butternut");
-        saskatoonCheckbox = new  CheckBox("Saskatoon");
+        saskatoonCheckbox = new CheckBox("Saskatoon");
         russianOliveCheckbox = new CheckBox("Russian Olive");
         coffeeTreeCheckBox = new CheckBox("Coffee Tree");
         walnutCheckBox = new CheckBox("Walnut");
         hackberryCheckBox = new CheckBox("Hackberry");
-        caraganaCheckBox =  new CheckBox("Caragana Flower/Pod");
+        caraganaCheckBox = new CheckBox("Caragana Flower/Pod");
 
-        appleCheckBox.setSelected(true);
-        cherryCheckBox.setSelected(true);
-        crabappleCheckBox.setSelected(true);
-        plumCheckBox.setSelected(true);
-        pearCheckBox.setSelected(true);
-        chokeCherryCheckBox.setSelected(true);
-        acornCheckBox.setSelected(true);
-        hawthornCheckBox.setSelected(true);
-        juniperCheckBox.setSelected(true);
-        butternutCheckBox.setSelected(true);
-        saskatoonCheckbox.setSelected(true);
-        russianOliveCheckbox.setSelected(true);
-        coffeeTreeCheckBox.setSelected(true);
-        walnutCheckBox.setSelected(true);
-        hackberryCheckBox.setSelected(true);
-        caraganaCheckBox.setSelected(true);
+        // start with everything selected
+        selectedBoxes(appleCheckBox, cherryCheckBox, crabappleCheckBox, plumCheckBox, pearCheckBox, chokeCherryCheckBox, acornCheckBox, hawthornCheckBox);
+        selectedBoxes(juniperCheckBox, butternutCheckBox, saskatoonCheckbox, russianOliveCheckbox, coffeeTreeCheckBox, walnutCheckBox, hackberryCheckBox, caraganaCheckBox);
 
-        // whenever any checkbox turns on or off, update visibility and header state
+        // when any checkbox changes, update visibility & header state
         addListener(appleCheckBox);
         addListener(cherryCheckBox);
         addListener(crabappleCheckBox);
@@ -134,9 +159,8 @@ public class TreeFilterPanel extends VBox {
         addListener(hackberryCheckBox);
         addListener(caraganaCheckBox);
 
-        VBox box = new VBox(
-                10,
-                headerRow,
+        // content that shows when dropdown is open
+        dropdownContent = new VBox(5, bulkRow,
                 appleCheckBox,
                 cherryCheckBox,
                 crabappleCheckBox,
@@ -155,16 +179,50 @@ public class TreeFilterPanel extends VBox {
                 caraganaCheckBox
         );
 
-        // initialize the Select all or Select none method
-        updateBulkSelectState();
+        dropdownContent.setPadding(new Insets(8, 10, 8, 10));
+        dropdownContent.setBorder(
+                new Border(new BorderStroke(
+                        Color.LIGHTGRAY,
+                        BorderStrokeStyle.SOLID,
+                        new CornerRadii(4),
+                        new BorderWidths(1, 1, 1, 1)))
+        );
+        dropdownContent.setBackground(
+                new Background(new BackgroundFill(Color.WHITE, new CornerRadii(4), Insets.EMPTY))
+        );
 
-        getChildren().add(box);
+        // start closed dropdown (header shows)
+        dropdownContent.setVisible(false);
+        dropdownContent.setManaged(false);
+        updateDropdownDisplayText();
+
+        // add everything to this VBox
+        getChildren().addAll(title, dropdownHeader, dropdownContent);
+    }
+
+    private void selectedBoxes(CheckBox appleCheckBox, CheckBox cherryCheckBox, CheckBox crabappleCheckBox, CheckBox plumCheckBox, CheckBox pearCheckBox, CheckBox chokeCherryCheckBox, CheckBox acornCheckBox, CheckBox hawthornCheckBox) {
+        appleCheckBox.setSelected(true);
+        cherryCheckBox.setSelected(true);
+        crabappleCheckBox.setSelected(true);
+        plumCheckBox.setSelected(true);
+        pearCheckBox.setSelected(true);
+        chokeCherryCheckBox.setSelected(true);
+        acornCheckBox.setSelected(true);
+        hawthornCheckBox.setSelected(true);
+    }
+
+    private void toggleDropdown() {
+        boolean nowVisible = !dropdownContent.isVisible();
+        dropdownContent.setVisible(nowVisible);
+        dropdownContent.setManaged(nowVisible);
+        dropdownArrow.setText(nowVisible ? "▲" : "▼");
     }
 
     private void addListener(CheckBox cb) {
         cb.selectedProperty().addListener((obs, o, n) -> {
             updateFruitVisibility();
             updateBulkSelectState();
+            updateDropdownDisplayText();
         });
     }
 
@@ -174,18 +232,19 @@ public class TreeFilterPanel extends VBox {
     }
 
     private void selected(boolean value, CheckBox appleCheckBox, CheckBox cherryCheckBox, CheckBox crabappleCheckBox, CheckBox plumCheckBox, CheckBox pearCheckBox, CheckBox chokeCherryCheckBox, CheckBox acornCheckBox, CheckBox hawthornCheckBox) {
-        if (appleCheckBox != null)       appleCheckBox.setSelected(value);
-        if (cherryCheckBox != null)      cherryCheckBox.setSelected(value);
-        if (crabappleCheckBox != null)   crabappleCheckBox.setSelected(value);
-        if (plumCheckBox != null)        plumCheckBox.setSelected(value);
-        if (pearCheckBox != null)        pearCheckBox.setSelected(value);
+        if (appleCheckBox != null) appleCheckBox.setSelected(value);
+        if (cherryCheckBox != null) cherryCheckBox.setSelected(value);
+        if (crabappleCheckBox != null) crabappleCheckBox.setSelected(value);
+        if (plumCheckBox != null) plumCheckBox.setSelected(value);
+        if (pearCheckBox != null) pearCheckBox.setSelected(value);
         if (chokeCherryCheckBox != null) chokeCherryCheckBox.setSelected(value);
-        if (acornCheckBox != null)       acornCheckBox.setSelected(value);
-        if (hawthornCheckBox != null)    hawthornCheckBox.setSelected(value);
+        if (acornCheckBox != null) acornCheckBox.setSelected(value);
+        if (hawthornCheckBox != null) hawthornCheckBox.setSelected(value);
     }
 
+
     private void updateBulkSelectState() {
-        if (appleCheckBox == null) return; // not initialized yet
+        if (appleCheckBox == null) return;
 
         boolean allSelected =
                 appleCheckBox.isSelected() &&
@@ -223,20 +282,20 @@ public class TreeFilterPanel extends VBox {
                         !hackberryCheckBox.isSelected() &&
                         !caraganaCheckBox.isSelected();
 
-
         setBulkSelectEnabled(selectAllLabel, !allSelected);
         setBulkSelectEnabled(selectNoneLabel, !noneSelected);
     }
+
 
     private void setBulkSelectEnabled(Label label, boolean enabled) {
         if (label == null) return;
 
         label.setDisable(!enabled);
         if (enabled) {
-            label.setTextFill(Color.DODGERBLUE); // blue when not clicked
+            label.setTextFill(Color.DODGERBLUE);
             label.setOpacity(1.0);
         } else {
-            label.setTextFill(Color.GREY);       // greyed out when clicked
+            label.setTextFill(Color.GREY);
             label.setOpacity(0.6);
         }
     }
@@ -256,29 +315,68 @@ public class TreeFilterPanel extends VBox {
         }
     }
 
-    /**
-     * For selected and unselected checkboxes
-     */
     private boolean isFruitEnabled(String key) {
         key = key.toLowerCase();
         return switch (key) {
-            case "apple"      -> appleCheckBox == null || appleCheckBox.isSelected();
-            case "cherry"     -> cherryCheckBox == null || cherryCheckBox.isSelected();
-            case "crabapple"  -> crabappleCheckBox == null || crabappleCheckBox.isSelected();
-            case "plum"       -> plumCheckBox == null || plumCheckBox.isSelected();
-            case "pear"       -> pearCheckBox == null || pearCheckBox.isSelected();
-            case "chokecherry"-> chokeCherryCheckBox == null || chokeCherryCheckBox.isSelected();
-            case "acorn"      -> acornCheckBox == null || acornCheckBox.isSelected();
-            case "hawthorn"   -> hawthornCheckBox == null || hawthornCheckBox.isSelected();
-            case "juniper"    -> juniperCheckBox == null || juniperCheckBox.isSelected();
-            case "butternut"  -> butternutCheckBox == null || butternutCheckBox.isSelected();
-            case "saskatoon"  -> saskatoonCheckbox == null || saskatoonCheckbox.isSelected();
+            case "apple" -> appleCheckBox == null || appleCheckBox.isSelected();
+            case "cherry" -> cherryCheckBox == null || cherryCheckBox.isSelected();
+            case "crabapple" -> crabappleCheckBox == null || crabappleCheckBox.isSelected();
+            case "plum" -> plumCheckBox == null || plumCheckBox.isSelected();
+            case "pear" -> pearCheckBox == null || pearCheckBox.isSelected();
+            case "chokecherry" -> chokeCherryCheckBox == null || chokeCherryCheckBox.isSelected();
+            case "acorn" -> acornCheckBox == null || acornCheckBox.isSelected();
+            case "hawthorn" -> hawthornCheckBox == null || hawthornCheckBox.isSelected();
+            case "juniper" -> juniperCheckBox == null || juniperCheckBox.isSelected();
+            case "butternut" -> butternutCheckBox == null || butternutCheckBox.isSelected();
+            case "saskatoon" -> saskatoonCheckbox == null || saskatoonCheckbox.isSelected();
             case "russian olive" -> russianOliveCheckbox == null || russianOliveCheckbox.isSelected();
             case "coffeetree pod" -> coffeeTreeCheckBox == null || coffeeTreeCheckBox.isSelected();
             case "walnut" -> walnutCheckBox == null || walnutCheckBox.isSelected();
             case "hackberry" -> hackberryCheckBox == null || hackberryCheckBox.isSelected();
             case "caragana flower/pod" -> caraganaCheckBox == null || caraganaCheckBox.isSelected();
-            default           -> true; // any other fruit type stays visible
+            default -> true;
         };
+    }
+
+    private void updateDropdownDisplayText() {
+
+        // LinkedHashMap keeps insertion order supports no limit to size
+        Map<String, Boolean> selections = new LinkedHashMap<>();
+
+        selections.put("Apple", appleCheckBox.isSelected());
+        selections.put("Cherry", cherryCheckBox.isSelected());
+        selections.put("Crabapple", crabappleCheckBox.isSelected());
+        selections.put("Plum", plumCheckBox.isSelected());
+        selections.put("Pear", pearCheckBox.isSelected());
+        selections.put("Chokecherry", chokeCherryCheckBox.isSelected());
+        selections.put("Acorn", acornCheckBox.isSelected());
+        selections.put("Hawthorn", hawthornCheckBox.isSelected());
+        selections.put("Juniper", juniperCheckBox.isSelected());
+        selections.put("Butternut", butternutCheckBox.isSelected());
+        selections.put("Saskatoon", saskatoonCheckbox.isSelected());
+        selections.put("Russian Olive", russianOliveCheckbox.isSelected());
+        selections.put("Coffee Tree", coffeeTreeCheckBox.isSelected());
+        selections.put("Walnut", walnutCheckBox.isSelected());
+        selections.put("Hackberry", hackberryCheckBox.isSelected());
+        selections.put("Caragana Flower/Pod", caraganaCheckBox.isSelected());
+
+        // count selected + list names
+        List<String> selectedNames = selections.entrySet().stream()
+                .filter(Map.Entry::getValue)
+                .map(Map.Entry::getKey)
+                .toList();
+
+        int count = selectedNames.size();
+        int total = selections.size();
+
+        if (count == 0) {
+            dropdownDisplay.setText("None selected");
+        } else if (count == total) {
+            dropdownDisplay.setText("All types selected");
+        } else if (count == 1) {
+            dropdownDisplay.setText(selectedNames.getFirst());  // show the specific fruit
+        } else {
+            dropdownDisplay.setText(count + " selected types");
+        }
     }
 }
