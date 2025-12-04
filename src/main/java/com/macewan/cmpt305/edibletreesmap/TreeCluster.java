@@ -70,6 +70,6 @@ public class TreeCluster {
      * @return List of trees (defensive copy)
      */
     public List<EdibleTree> getTrees() {
-        return new ArrayList<>(trees);
+        return trees;
     }
 }

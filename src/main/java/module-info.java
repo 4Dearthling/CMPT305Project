@@ -6,6 +6,7 @@ module com.macewan.cmpt305.edibletreesmap {
     requires java.net.http;
     requires com.opencsv;
     requires org.apache.commons.csv;
+    requires jdk.compiler;
 
     opens com.macewan.cmpt305.edibletreesmap to javafx.fxml;
     exports com.macewan.cmpt305.edibletreesmap;

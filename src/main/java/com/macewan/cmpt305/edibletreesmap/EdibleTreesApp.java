@@ -1,23 +1,27 @@
 package com.macewan.cmpt305.edibletreesmap;
 
 import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
+import com.esri.arcgisruntime.geometry.GeometryEngine;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.BasemapStyle;
 import com.esri.arcgisruntime.mapping.Viewpoint;
+import com.esri.arcgisruntime.mapping.view.Callout;
 import com.esri.arcgisruntime.mapping.view.Graphic;
 import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
 import javafx.scene.text.Font;
 import javafx.scene.layout.VBox;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.FontWeight;
@@ -39,10 +43,14 @@ public class EdibleTreesApp extends Application {
     // Map components
     private MapView mapView;
     private GraphicsOverlay graphicsOverlay;
+    private Callout callout;
+    private TreeCluster cluster;
+    private List<TreeCluster> clusters;
 
     // Services
     private TreeClusteringScript clusteringScript;
     private MapRenderer mapRenderer;
+    private MapInteractionHandler mapInteractionHandler;
 
     // Data
     private static EdibleTrees edibleTrees;
@@ -163,6 +171,7 @@ public class EdibleTreesApp extends Application {
         return container;
     }
 
+
     /**
      * Initializes the ArcGIS map view centered on Edmonton
      */
@@ -187,6 +196,39 @@ public class EdibleTreesApp extends Application {
         mapView.getGraphicsOverlays().add(graphicsOverlay);
 
 
+
+    /**
+     * Creates the side panel with title and controls
+     */
+    private VBox createSidePanel() {
+        VBox sidePane = new VBox(10);
+        sidePane.setPadding(new Insets(10));
+        sidePane.setBackground(new Background(
+                new BackgroundFill(Color.LIGHTSKYBLUE, CornerRadii.EMPTY, Insets.EMPTY)
+        ));
+        sidePane.setPrefWidth(350);
+
+        // Add drop shadow effect
+        DropShadow dropShadow = new DropShadow();
+        dropShadow.setColor(Color.BLACK);
+        dropShadow.setRadius(10.0);
+        dropShadow.setOffsetX(5.0);
+        dropShadow.setOffsetY(0.0);
+        sidePane.setEffect(dropShadow);
+
+        // Add title
+        Label titleLabel = new Label("Edmonton Edible Trees");
+        titleLabel.setFont(Font.font("System", 18));
+        titleLabel.setStyle("-fx-font-weight: 800;");
+        sidePane.getChildren().add(titleLabel);
+
+        // Add refresh button
+        Button refreshButton = new Button("Refresh Clusters");
+        refreshButton.setStyle("-fx-font-size: 14px; -fx-padding: 10;");
+        refreshButton.setMaxWidth(Double.MAX_VALUE);
+        refreshButton.setOnAction(e -> refreshClusters());
+        sidePane.getChildren().add(refreshButton);
+
     }
     /**
      * Loads tree data asynchronously in a background thread
@@ -201,6 +243,7 @@ public class EdibleTreesApp extends Application {
                 // Update map on JavaFX thread
                 javafx.application.Platform.runLater(() -> {
                     if (edibleTrees != null) {
+                        mapInteractionHandler = new MapInteractionHandler(mapView, edibleTrees);
                         refreshClusters();
                     }
                 });
@@ -231,7 +274,7 @@ public class EdibleTreesApp extends Application {
         double clusterDistance = clusteringScript.getClusterDistance(currentScale);
 
         // Cluster the trees
-        List<TreeCluster> clusters = clusteringScript.clusterTrees(
+        clusters = clusteringScript.clusterTrees(
                 edibleTrees.getTrees(),
                 clusterDistance
         );
@@ -241,6 +284,11 @@ public class EdibleTreesApp extends Application {
 
         // Update last scale
         lastScale = currentScale;
+
+        if (mapInteractionHandler != null) {
+            mapInteractionHandler.clearCallout();
+            mapInteractionHandler.setCluster(clusters);
+        }
 
         System.out.println("Refreshed clusters at scale " + currentScale +
                 " - showing " + clusters.size() + " clusters");

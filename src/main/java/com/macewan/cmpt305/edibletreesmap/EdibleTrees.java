@@ -1,8 +1,12 @@
 package com.macewan.cmpt305.edibletreesmap;
 
-import java.util.ArrayList;
+import com.esri.arcgisruntime.geometry.GeometryEngine;
+import com.esri.arcgisruntime.geometry.SpatialReferences;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.esri.arcgisruntime.geometry.Point;
+
 
 public class EdibleTrees {
     private final List<EdibleTree> trees;
@@ -13,8 +17,32 @@ public class EdibleTrees {
     public String toString() {
         return trees.stream().map(EdibleTree::toString).collect(Collectors.joining("\n"));
     }
+    public Integer getSize(){
+        return trees.size();
+    }
     public List<EdibleTree> getTrees() {
         return trees;
+    }
+    public EdibleTree getTreeByPoint(Point point) {
+        double toleranceInMeters = 10.0;
+
+        return trees.stream()
+                .filter(tree -> calculateDistance(point, tree.getPlantLocation().getPoint()) <= toleranceInMeters)
+                .min(Comparator.comparingDouble(tree -> calculateDistance(point, tree.getPlantLocation().getPoint())))
+                .orElse(null);
+    }
+    private double calculateDistance(Point p1, Point p2) {
+        p1 = (Point)GeometryEngine.project(p1, SpatialReferences.getWebMercator());
+        p2 = (Point)GeometryEngine.project(p2, SpatialReferences.getWebMercator());
+        double dx = p1.getX() - p2.getX();
+        double dy = p1.getY() - p2.getY();
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    public List<EdibleTree> getTreeByRadius(Point centerPoint, double radius) {
+        return trees.stream()
+                .filter(tree -> calculateDistance(centerPoint, tree.getPlantLocation().getPoint()) <= radius)
+                .collect(Collectors.toList());
     }
 
     public List<EdibleTree> getByNeighborhood(String neighborhood) {
