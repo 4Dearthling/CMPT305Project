@@ -122,14 +122,6 @@ public class EdibleTreesApp extends Application {
         // Title
         Label title = new Label("Edmonton Edible Trees");
         title.setFont(Font.font("System", FontWeight.BOLD, 18));
-
-//         // Add drop shadow effect
-//         DropShadow dropShadow = new DropShadow();
-//         dropShadow.setColor(Color.BLACK);
-//         dropShadow.setRadius(10.0);
-//         dropShadow.setOffsetX(5.0);
-//         dropShadow.setOffsetY(0.0);
-//         sidePane.setEffect(dropShadow);
       
         // filter section (moved into TreeFilterPanel)
         TreeFilterPanel filterBox = new TreeFilterPanel(fruitGraphics);
@@ -194,42 +186,8 @@ public class EdibleTreesApp extends Application {
 
         graphicsOverlay = new GraphicsOverlay();
         mapView.getGraphicsOverlays().add(graphicsOverlay);
-
-
-
-    /**
-     * Creates the side panel with title and controls
-     */
-    private VBox createSidePanel() {
-        VBox sidePane = new VBox(10);
-        sidePane.setPadding(new Insets(10));
-        sidePane.setBackground(new Background(
-                new BackgroundFill(Color.LIGHTSKYBLUE, CornerRadii.EMPTY, Insets.EMPTY)
-        ));
-        sidePane.setPrefWidth(350);
-
-        // Add drop shadow effect
-        DropShadow dropShadow = new DropShadow();
-        dropShadow.setColor(Color.BLACK);
-        dropShadow.setRadius(10.0);
-        dropShadow.setOffsetX(5.0);
-        dropShadow.setOffsetY(0.0);
-        sidePane.setEffect(dropShadow);
-
-        // Add title
-        Label titleLabel = new Label("Edmonton Edible Trees");
-        titleLabel.setFont(Font.font("System", 18));
-        titleLabel.setStyle("-fx-font-weight: 800;");
-        sidePane.getChildren().add(titleLabel);
-
-        // Add refresh button
-        Button refreshButton = new Button("Refresh Clusters");
-        refreshButton.setStyle("-fx-font-size: 14px; -fx-padding: 10;");
-        refreshButton.setMaxWidth(Double.MAX_VALUE);
-        refreshButton.setOnAction(e -> refreshClusters());
-        sidePane.getChildren().add(refreshButton);
-
     }
+
     /**
      * Loads tree data asynchronously in a background thread
      */
@@ -252,12 +210,6 @@ public class EdibleTreesApp extends Application {
             }
         }).start();
     }
-
-    /**
-     * Sets colours for each tree for distinction
-     */
-
-
 
 
      
