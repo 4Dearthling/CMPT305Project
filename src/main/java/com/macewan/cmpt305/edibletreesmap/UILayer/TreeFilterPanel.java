@@ -1,7 +1,5 @@
-package com.macewan.cmpt305.edibletreesmap;
+package com.macewan.cmpt305.edibletreesmap.UILayer;
 
-import com.esri.arcgisruntime.mapping.view.Graphic;
-import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
 import javafx.geometry.Insets;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -11,11 +9,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 public class TreeFilterPanel extends VBox {
+    /*
+    * The checkout boxes in the side panel is dealt with here
+    * */
 
     private CheckBox appleCheckBox;
     private CheckBox cherryCheckBox;
@@ -38,17 +35,22 @@ public class TreeFilterPanel extends VBox {
     private Label selectNoneLabel;
 
     // reference to fruitGraphics from the app
-    private final Map<String, List<Graphic>> fruitGraphics;
+    //private final Map<String, List<Graphic>> fruitGraphics;
+    private final TreeGraphicsManager treeGraphicsManager;
 
-    public TreeFilterPanel(Map<String, List<Graphic>> fruitGraphics) {
+    public TreeFilterPanel(TreeGraphicsManager treeGraphicsManager) {
         super(10);
-        this.fruitGraphics = fruitGraphics;
+        this.treeGraphicsManager = treeGraphicsManager;
         setPadding(new Insets(0));
         buildUI();
         updateBulkSelectState();
     }
 
-
+    private void updateFruitVisibility(){
+        for (String fruit: treeGraphicsManager.getFruitTypes()){
+            treeGraphicsManager.setFruitVisibility(fruit, isFruitEnabled(fruit));
+        }
+    }
 
 
     private void buildUI() {
@@ -241,20 +243,20 @@ public class TreeFilterPanel extends VBox {
         }
     }
 
-    private void updateFruitVisibility() {
-        if (fruitGraphics.isEmpty()) {
-            return;
-        }
-
-        for (var entry : fruitGraphics.entrySet()) {
-            String key = entry.getKey();
-            boolean visible = isFruitEnabled(key);
-
-            for (Graphic g : entry.getValue()) {
-                g.setVisible(visible);
-            }
-        }
-    }
+//    private void updateFruitVisibility() {
+//        if (fruitGraphics.isEmpty()) {
+//            return;
+//        }
+//
+//        for (var entry : fruitGraphics.entrySet()) {
+//            String key = entry.getKey();
+//            boolean visible = isFruitEnabled(key);
+//
+//            for (Graphic g : entry.getValue()) {
+//                g.setVisible(visible);
+//            }
+//        }
+//    }
 
     /**
      * For selected and unselected checkboxes

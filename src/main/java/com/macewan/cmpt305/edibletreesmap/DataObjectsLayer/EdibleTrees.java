@@ -1,4 +1,4 @@
-package com.macewan.cmpt305.edibletreesmap;
+package com.macewan.cmpt305.edibletreesmap.DataObjectsLayer;
 
 import com.esri.arcgisruntime.geometry.GeometryEngine;
 import com.esri.arcgisruntime.geometry.SpatialReferences;

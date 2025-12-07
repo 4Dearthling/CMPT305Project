@@ -1,4 +1,6 @@
-package com.macewan.cmpt305.edibletreesmap;
+package com.macewan.cmpt305.edibletreesmap.DataAccessLayer;
+import com.macewan.cmpt305.edibletreesmap.DataObjectsLayer.EdibleTree;
+import com.macewan.cmpt305.edibletreesmap.DataObjectsLayer.EdibleTreeDAO;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -17,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class ApiCsvEtDAO implements EdibleTreeDAO{
+public class ApiCsvEtDAO implements EdibleTreeDAO {
     private final String endpoint;
     private final String APP_TOKEN = "25zGMa63Gh9IFkA8xUv47Zzyy";
     public ApiCsvEtDAO(String endpoint) {this.endpoint = endpoint;}

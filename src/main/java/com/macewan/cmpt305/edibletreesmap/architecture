@@ -1,0 +1,23 @@
+├── DataAccessLayer
+│ └── ApiCsvEtDAO.java
+├── DataObjectsLayer
+│ ├── EdibleTree.java
+│ ├── EdibleTreeDAO.java
+│ ├── EdibleTrees.java
+│ ├── PlantBiology.java
+│ ├── PlantInfo.java
+│ ├── PlantLocation.java
+│ └── TreeCluster.java
+├── ServiceLayer
+│ ├── TreeClusteringScript.java
+│ └── TreeMapService.java
+├── UILayer
+│ ├── EdibleTreesApp.java
+│ ├── FruitColorMapper.java
+│ ├── MainLayout.java
+│ ├── MapInteractionHandler.java
+│ ├── MapRenderer.java
+│ ├── SidePanel.java
+│ ├── TreeFilterPanel.java
+│ └── TreeGraphicsManager.java
+└── architecture
