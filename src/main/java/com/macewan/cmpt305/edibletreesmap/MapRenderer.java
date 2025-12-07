@@ -35,10 +35,14 @@ public class MapRenderer {
      * Multi-tree clusters are drawn as colored circles with counts.
      *
      * @param clusters List of tree clusters to draw
+     * @param fruitGraphics Track graphics by fruit type for filtering
      */
     public void drawClusters(List<TreeCluster> clusters, Map<String, List<Graphic>> fruitGraphics) {
-        // Clear existing graphics
+        // Clear existing graphics from map
         graphicsOverlay.getGraphics().clear();
+
+        // Clear the fruitGraphics map to remove old references
+        fruitGraphics.clear();
 
         // Draw each cluster
         for (TreeCluster cluster : clusters) {
@@ -49,55 +53,15 @@ public class MapRenderer {
             }
 
             if (cluster.getTreeCount() == 1) {
-                // Single tree - draw as individual marker
+                // If were dealing with a single tree draw as individual colored marker (for filtering)
                 EdibleTree singleTree = cluster.getTrees().getFirst();
                 MapTrees.drawTrees(singleTree, graphicsOverlay, fruitGraphics);
-                //drawIndividualTree(singleTree);
             } else {
-                // Multiple trees - draw as cluster
+                // If it is with multiple trees draw as labeled cluster
                 drawCluster(centerPoint, cluster.getTreeCount());
             }
         }
     }
-
-    /**
-     * Draws an individual tree marker.
-     * Displayed as a small green circle.
-     *
-     * @param tree the tree of a single cluster
-     */
-//    private void drawIndividualTree(EdibleTree tree) {
-//        String fruitType = tree.getPlantBiology().getTypeFruit();
-//        if (fruitType == null) {
-//            fruitType = "";
-//        }
-//        String key = fruitType.trim().toLowerCase();
-//
-//        // picking a colour based on fruit type
-//        Color color = getColorForFruit(key);
-//        SimpleMarkerSymbol symbol =
-//                new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.CIRCLE, color, 10);
-//
-//        Graphic graphic = new Graphic(tree.getPlantLocation().getPoint(), symbol);
-//
-//        // add to overlay
-//        graphicsOverlay.getGraphics().add(graphic);
-//
-//        //remember which graphics belong to which fruit
-//        fruitGraphics
-//                .computeIfAbsent(key, k -> new ArrayList<>())
-//                .add(graphic);
-////        SimpleMarkerSymbol symbol = new SimpleMarkerSymbol(
-////                SimpleMarkerSymbol.Style.CIRCLE,
-////                Color.rgb(34, 139, 34), // Forest Green
-////                8
-////        );
-////
-////        Graphic graphic = new Graphic(point, symbol);
-//        graphicsOverlay.getGraphics().add(graphic);
-//    }
-//
-
 
     /**
      * Draws a cluster marker with count label.
@@ -116,16 +80,16 @@ public class MapRenderer {
         double size;
 
         if (count < 10) {
-            color = Color.rgb(50, 205, 50); // Green
+            color = Color.rgb(42, 157, 143);
             size = 20;
         } else if (count < 50) {
-            color = Color.rgb(255, 215, 0); // Yellow
+            color = Color.rgb(233, 196, 106);
             size = 30;
         } else if (count < 100) {
-            color = Color.rgb(255, 140, 0); // Orange
+            color = Color.rgb(244, 162, 97);
             size = 40;
         } else {
-            color = Color.rgb(220, 20, 60); // Red
+            color = Color.rgb(231, 111, 81);
             size = 50;
         }
 
@@ -138,13 +102,12 @@ public class MapRenderer {
 
         // Create text label showing tree count
         TextSymbol textSymbol = new TextSymbol(
-                14,                                      // font size
+                13,                                 // font size
                 String.valueOf(count),                   // text
                 Color.WHITE,                             // color
                 TextSymbol.HorizontalAlignment.CENTER,
                 TextSymbol.VerticalAlignment.MIDDLE
         );
-        textSymbol.setHaloColor(Color.BLACK);            // Black outline for readability
         textSymbol.setHaloWidth(1);
 
         // Combine circle and text into composite symbol

@@ -281,4 +281,28 @@ public class TreeFilterPanel extends VBox {
             default           -> true; // any other fruit type stays visible
         };
     }
+
+    /**
+     * Returns a filtered list of trees based on selected checkboxes
+     * @param allTrees The complete list of trees to filter
+     * @return List containing only trees with selected fruit types
+     */
+    public List<EdibleTree> getFilteredTrees(List<EdibleTree> allTrees) {
+        List<EdibleTree> filtered = new ArrayList<>();
+
+        for (EdibleTree tree : allTrees) {
+            String fruitType = tree.getPlantBiology().getTypeFruit();
+            if (fruitType == null) {
+                fruitType = "";
+            }
+            String key = fruitType.trim().toLowerCase();
+
+            // Only include tree if its fruit type it is checked
+            if (isFruitEnabled(key)) {
+                filtered.add(tree);
+            }
+        }
+
+        return filtered;
+    }
 }

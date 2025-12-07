@@ -51,6 +51,7 @@ public class EdibleTreesApp extends Application {
     private TreeClusteringScript clusteringScript;
     private MapRenderer mapRenderer;
     private MapInteractionHandler mapInteractionHandler;
+    private TreeFilterPanel filterPanel;
 
     // Data
     private static EdibleTrees edibleTrees;
@@ -99,7 +100,7 @@ public class EdibleTreesApp extends Application {
 
         // Add control panel
         VBox sidePane = createSidePanel();
-        
+
         //side by side
         HBox mainPane = new HBox();
         mainPane.getChildren().addAll(mapView, sidePane);
@@ -110,29 +111,29 @@ public class EdibleTreesApp extends Application {
         Scene scene = new Scene(mainPane);
         stage.setScene(scene);
         stage.show();
-      
+
         // Load tree data in background
         loadTreeDataAsync();
-    
+
     }
-  
+
     private VBox createSidePanel() {
         VBox sidePane = getVBox();
 
         // Title
         Label title = new Label("Edmonton Edible Trees");
         title.setFont(Font.font("System", FontWeight.BOLD, 18));
-      
+
         // filter section (moved into TreeFilterPanel)
-        TreeFilterPanel filterBox = new TreeFilterPanel(fruitGraphics);
+        filterPanel = new TreeFilterPanel(fruitGraphics);
 
         // Add refresh button
         Button refreshButton = new Button("Refresh Clusters");
         refreshButton.setStyle("-fx-font-size: 14px; -fx-padding: 10;");
         refreshButton.setMaxWidth(Double.MAX_VALUE);
         refreshButton.setOnAction(e -> refreshClusters());
-      
-        sidePane.getChildren().addAll(title, filterBox, refreshButton);
+
+        sidePane.getChildren().addAll(title, filterPanel, refreshButton);
 
         return sidePane;
     }
@@ -212,9 +213,9 @@ public class EdibleTreesApp extends Application {
     }
 
 
-     
+
     /**
-      * Refreshes the tree clusters on the map based on current zoom level
+     * Refreshes the tree clusters on the map based on current zoom level
      */
     private void refreshClusters() {
         if (edibleTrees == null) {
@@ -225,9 +226,12 @@ public class EdibleTreesApp extends Application {
         double currentScale = mapView.getMapScale();
         double clusterDistance = clusteringScript.getClusterDistance(currentScale);
 
-        // Cluster the trees
+        // Filter trees based on selected fruit types before clustering
+        List<EdibleTree> filteredTrees = filterPanel.getFilteredTrees(edibleTrees.getTrees());
+
+        // Cluster only the filtered trees
         clusters = clusteringScript.clusterTrees(
-                edibleTrees.getTrees(),
+                filteredTrees,
                 clusterDistance
         );
 
@@ -243,7 +247,7 @@ public class EdibleTreesApp extends Application {
         }
 
         System.out.println("Refreshed clusters at scale " + currentScale +
-                " - showing " + clusters.size() + " clusters");
+                " - showing " + clusters.size() + " clusters from " + filteredTrees.size() + " filtered trees");
     }
 
     /**
