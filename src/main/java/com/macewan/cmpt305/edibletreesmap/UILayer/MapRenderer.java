@@ -150,6 +150,7 @@ public class MapRenderer {
         graphicsOverlay.getGraphics().add(graphic);
     }
 
+
     /**
      * Clears all graphics from the map
      */
