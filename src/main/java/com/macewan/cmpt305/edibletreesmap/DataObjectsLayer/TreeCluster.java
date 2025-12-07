@@ -1,4 +1,4 @@
-package com.macewan.cmpt305.edibletreesmap;
+package com.macewan.cmpt305.edibletreesmap.DataObjectsLayer;
 
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.SpatialReferences;
@@ -11,6 +11,9 @@ import java.util.List;
  * Used for grouping nearby trees together for map visualization.
  */
 public class TreeCluster {
+    /*
+    Creates a representation of the data as clusters
+     */
     private List<EdibleTree> trees;
 
     /**

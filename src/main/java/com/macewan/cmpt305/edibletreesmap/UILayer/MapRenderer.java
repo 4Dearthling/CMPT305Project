@@ -1,4 +1,4 @@
-package com.macewan.cmpt305.edibletreesmap;
+package com.macewan.cmpt305.edibletreesmap.UILayer;
 
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.mapping.view.Graphic;
@@ -7,27 +7,55 @@ import com.esri.arcgisruntime.symbology.CompositeSymbol;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
 import com.esri.arcgisruntime.symbology.Symbol;
 import com.esri.arcgisruntime.symbology.TextSymbol;
+import com.macewan.cmpt305.edibletreesmap.DataObjectsLayer.EdibleTree;
+import com.macewan.cmpt305.edibletreesmap.DataObjectsLayer.TreeCluster;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Handles rendering of tree clusters on the ArcGIS map.
  */
 public class MapRenderer {
+    /*
+    * Creates all the UI elements on the map
+    */
 
     private final GraphicsOverlay graphicsOverlay;
+    private final TreeGraphicsManager treeGraphicsManager;
 
     /**
      * Creates a new MapRenderer
      *
      * @param graphicsOverlay The graphics overlay to draw on
+     * @param treeGraphicsManager A graphics manager ot manage all the individual tree graphics
      */
-    public MapRenderer(GraphicsOverlay graphicsOverlay) {
+    public MapRenderer(TreeGraphicsManager treeGraphicsManager, GraphicsOverlay graphicsOverlay) {
         this.graphicsOverlay = graphicsOverlay;
+        this.treeGraphicsManager = treeGraphicsManager;
     }
+
+    public void drawIndividualTrees(EdibleTree tree ) {
+
+        String fruitType = tree.getPlantBiology().getTypeFruit();
+        if (fruitType == null) {
+            fruitType = "";
+        }
+        Color color = FruitColorMapper.getColor(fruitType);
+        String key = fruitType.trim().toLowerCase();
+
+        SimpleMarkerSymbol symbol =
+                new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.CIRCLE, color, 10);
+
+        Graphic graphic = new Graphic(tree.getPlantLocation().getPoint(), symbol);
+
+        // add to tree graphics
+        treeGraphicsManager.addTreeGraphics(fruitType, graphic);
+    }
+
+
+
 
     /**
      * Draws tree clusters on the map.
@@ -36,9 +64,9 @@ public class MapRenderer {
      *
      * @param clusters List of tree clusters to draw
      */
-    public void drawClusters(List<TreeCluster> clusters, Map<String, List<Graphic>> fruitGraphics) {
+    public void drawClusters(List<TreeCluster> clusters) {
         // Clear existing graphics
-        graphicsOverlay.getGraphics().clear();
+        treeGraphicsManager.clear();
 
         // Draw each cluster
         for (TreeCluster cluster : clusters) {
@@ -51,7 +79,7 @@ public class MapRenderer {
             if (cluster.getTreeCount() == 1) {
                 // Single tree - draw as individual marker
                 EdibleTree singleTree = cluster.getTrees().getFirst();
-                MapTrees.drawTrees(singleTree, graphicsOverlay, fruitGraphics);
+                drawIndividualTrees(singleTree);
                 //drawIndividualTree(singleTree);
             } else {
                 // Multiple trees - draw as cluster
@@ -60,43 +88,6 @@ public class MapRenderer {
         }
     }
 
-    /**
-     * Draws an individual tree marker.
-     * Displayed as a small green circle.
-     *
-     * @param tree the tree of a single cluster
-     */
-//    private void drawIndividualTree(EdibleTree tree) {
-//        String fruitType = tree.getPlantBiology().getTypeFruit();
-//        if (fruitType == null) {
-//            fruitType = "";
-//        }
-//        String key = fruitType.trim().toLowerCase();
-//
-//        // picking a colour based on fruit type
-//        Color color = getColorForFruit(key);
-//        SimpleMarkerSymbol symbol =
-//                new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.CIRCLE, color, 10);
-//
-//        Graphic graphic = new Graphic(tree.getPlantLocation().getPoint(), symbol);
-//
-//        // add to overlay
-//        graphicsOverlay.getGraphics().add(graphic);
-//
-//        //remember which graphics belong to which fruit
-//        fruitGraphics
-//                .computeIfAbsent(key, k -> new ArrayList<>())
-//                .add(graphic);
-////        SimpleMarkerSymbol symbol = new SimpleMarkerSymbol(
-////                SimpleMarkerSymbol.Style.CIRCLE,
-////                Color.rgb(34, 139, 34), // Forest Green
-////                8
-////        );
-////
-////        Graphic graphic = new Graphic(point, symbol);
-//        graphicsOverlay.getGraphics().add(graphic);
-//    }
-//
 
 
     /**

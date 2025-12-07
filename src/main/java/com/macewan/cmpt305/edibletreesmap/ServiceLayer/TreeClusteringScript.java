@@ -1,4 +1,7 @@
-package com.macewan.cmpt305.edibletreesmap;
+package com.macewan.cmpt305.edibletreesmap.ServiceLayer;
+
+import com.macewan.cmpt305.edibletreesmap.DataObjectsLayer.EdibleTree;
+import com.macewan.cmpt305.edibletreesmap.DataObjectsLayer.TreeCluster;
 
 import java.util.ArrayList;
 import java.util.HashMap;

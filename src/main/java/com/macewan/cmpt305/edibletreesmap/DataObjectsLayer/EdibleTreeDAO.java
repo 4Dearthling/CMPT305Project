@@ -1,4 +1,4 @@
-package com.macewan.cmpt305.edibletreesmap;
+package com.macewan.cmpt305.edibletreesmap.DataObjectsLayer;
 
 import java.io.IOException;
 import java.util.List;

@@ -1,16 +1,22 @@
-package com.macewan.cmpt305.edibletreesmap;
+package com.macewan.cmpt305.edibletreesmap.UILayer;
 
 import com.esri.arcgisruntime.geometry.GeometryEngine;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.mapping.view.Callout;
 import com.esri.arcgisruntime.mapping.view.MapView;
+import com.macewan.cmpt305.edibletreesmap.DataObjectsLayer.EdibleTree;
+import com.macewan.cmpt305.edibletreesmap.DataObjectsLayer.EdibleTrees;
+import com.macewan.cmpt305.edibletreesmap.DataObjectsLayer.TreeCluster;
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseButton;
 
 import java.util.List;
 
 public class MapInteractionHandler {
+    /*
+    * Anything that the user does is dealt with here
+    * */
     private final MapView mapView;
     private final Callout callout;
     private final EdibleTrees edibleTrees;

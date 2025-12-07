@@ -1,4 +1,4 @@
-package com.macewan.cmpt305.edibletreesmap;
+package com.macewan.cmpt305.edibletreesmap.DataObjectsLayer;
 
 public class PlantInfo {
     private Integer diameterBreastHeight;
