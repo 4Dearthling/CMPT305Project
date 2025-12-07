@@ -19,12 +19,12 @@ public class TreeClusteringScript {
      */
     public List<TreeCluster> clusterTrees(List<EdibleTree> trees, double clusterDistance) {
 
-        // Special case: when zoomed in very close, show every tree individually
+        // When zoomed in very close show every tree individually
         if (clusterDistance == 0) {
             return createIndividualClusters(trees);
         }
 
-        // Store clusters by grid cell: key = "gridLat,gridLon", value = cluster
+        // Store clusters by using a grid cell format: key = "gridLat,gridLon", value = cluster
         Map<String, TreeCluster> gridClusters = new HashMap<>();
 
         // Process each tree and assign it to a grid cell
@@ -80,7 +80,7 @@ public class TreeClusteringScript {
     }
 
     /**
-     * Creates individual clusters for each tree (no grouping).
+     * Creates individual clusters for each tree.
      * Used when zoomed in very close and clustering is not needed.
      *
      * @param trees The list of trees
@@ -112,7 +112,7 @@ public class TreeClusteringScript {
         int gridLat = (int) Math.floor(lat / clusterDistance);
         int gridLon = (int) Math.floor(lon / clusterDistance);
 
-        // Combine into unique string key for this grid cell
+        // Combine string key
         return gridLat + "," + gridLon;
     }
 }
