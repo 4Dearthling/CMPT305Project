@@ -283,4 +283,8 @@ public class TreeFilterPanel extends VBox {
             default           -> true; // any other fruit type stays visible
         };
     }
+
+    public void refreshVisibility(){
+        updateFruitVisibility();
+    }
 }

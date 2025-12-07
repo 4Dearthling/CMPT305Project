@@ -22,8 +22,8 @@ public class MainLayout extends StackPane {
 
         mainWindow.getChildren().addAll(mapView, sidePanel);
         HBox.setHgrow(mapView, Priority.ALWAYS);
-        HBox.setHgrow(sidePanel, Priority.ALWAYS);
-        this.getChildren().add(mainWindow);
+        //HBox.setHgrow(sidePanel, Priority.ALWAYS);
+        getChildren().add(mainWindow);
 
     }
 

@@ -10,18 +10,19 @@ public class TreeGraphicsManager {
     * All graphics to do with displaying the trees is dealt with here
     * */
     private Map<String, List<Graphic>> fruitGraphics = new HashMap<>();
-    private GraphicsOverlay fruitGraphicOverlay;
+    private GraphicsOverlay graphicsOverlay;
 
     public TreeGraphicsManager(GraphicsOverlay fruitGraphicOverlay) {
-        this.fruitGraphicOverlay = fruitGraphicOverlay;
+        this.graphicsOverlay = fruitGraphicOverlay;
     }
 
     public void addTreeGraphics(String fruit, Graphic fruitGraphic) {
+        fruitGraphic.setVisible(true);
         //remember which graphics belong to which fruit
         fruitGraphics
                 .computeIfAbsent(fruit.toLowerCase(), k -> new ArrayList<>())
                 .add(fruitGraphic);
-        fruitGraphicOverlay.getGraphics().add(fruitGraphic);
+        graphicsOverlay.getGraphics().add(fruitGraphic);
     }
 
     public void setFruitVisibility(String fruitType, boolean visible) {
@@ -34,7 +35,7 @@ public class TreeGraphicsManager {
     }
 
     public void clear(){
-        fruitGraphicOverlay.getGraphics().clear();
+        graphicsOverlay.getGraphics().clear();
         fruitGraphics.clear();
     }
     public Map<String, List<Graphic>> getFruitGraphics() {

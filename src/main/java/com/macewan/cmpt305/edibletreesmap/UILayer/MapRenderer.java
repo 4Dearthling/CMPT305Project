@@ -43,7 +43,6 @@ public class MapRenderer {
             fruitType = "";
         }
         Color color = FruitColorMapper.getColor(fruitType);
-        String key = fruitType.trim().toLowerCase();
 
         SimpleMarkerSymbol symbol =
                 new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.CIRCLE, color, 10);
@@ -67,6 +66,8 @@ public class MapRenderer {
     public void drawClusters(List<TreeCluster> clusters) {
         // Clear existing graphics
         treeGraphicsManager.clear();
+
+
 
         // Draw each cluster
         for (TreeCluster cluster : clusters) {

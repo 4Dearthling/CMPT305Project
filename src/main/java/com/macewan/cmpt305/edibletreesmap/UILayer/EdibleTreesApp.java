@@ -31,10 +31,8 @@ public class EdibleTreesApp extends Application {
     private MapView mapView;
     private GraphicsOverlay graphicsOverlay;
     private TreeMapService treeMapService;
-
-
-
     private MapInteractionHandler mapInteractionHandler;
+    private SidePanel sidePanel;
 
     // Data
     private static EdibleTrees edibleTrees;
@@ -76,7 +74,7 @@ public class EdibleTreesApp extends Application {
         treeMapService = new TreeMapService(mapView, mapRenderer);
 
         // Build UI
-        SidePanel sidePanel = new SidePanel(treeMapService::refreshClusters, graphicsManager);
+        sidePanel = new SidePanel(treeMapService::refreshClusters, graphicsManager);
         MainLayout layout = new MainLayout(mapView, sidePanel);
 
 
@@ -178,6 +176,9 @@ public class EdibleTreesApp extends Application {
                         mapInteractionHandler = new MapInteractionHandler(mapView, treeMapService.getEdibleTrees());
                         treeMapService.setMapInteractionHandler(mapInteractionHandler);
                         treeMapService.refreshClusters();
+
+                        // Refreshes filters after trees are rendered
+                        sidePanel.refreshFilters();
                     }
                 });
             } catch (IOException e) {

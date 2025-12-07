@@ -10,15 +10,16 @@ import javafx.scene.control.Button;
 
 public class SidePanel extends VBox{
     private Button refreshButton;
-    private final VBox mainPane;
+    private TreeFilterPanel treeFilterPanel;
 
     public SidePanel(Runnable refreshCluster, TreeGraphicsManager treeGraphicsManager) {
         /*
         * Formats the side panel elements
         * */
-        mainPane = getVBox();
+        super(20);
+        applyStyles();
         buildUI(refreshCluster, treeGraphicsManager);
-        this.getChildren().add(mainPane);
+        //this.getChildren().add(mainPane);
     }
 
     private void buildUI(Runnable refreshCluster, TreeGraphicsManager treeGraphicsManager) {
@@ -27,7 +28,7 @@ public class SidePanel extends VBox{
         title.setFont(Font.font("System", FontWeight.BOLD, 18));
 
         // filter section (moved into TreeFilterPanel)
-        TreeFilterPanel filterBox = new TreeFilterPanel(treeGraphicsManager);
+        treeFilterPanel = new TreeFilterPanel(treeGraphicsManager);
 
         // Add refresh button
         refreshButton = new Button("Refresh Clusters");
@@ -35,30 +36,33 @@ public class SidePanel extends VBox{
         refreshButton.setMaxWidth(Double.MAX_VALUE);
         refreshButton.setOnAction(e -> refreshCluster.run());
 
-        mainPane.getChildren().addAll(title, filterBox, refreshButton);
+        getChildren().addAll(title, treeFilterPanel, refreshButton);
 
     }
 
-    private static VBox getVBox() {
+    private void applyStyles() {
 
-        VBox container = new VBox(20); //creating side panel box
-        container.setPadding(new Insets(20));
-        container.setPrefWidth(350);
+        setPadding(new Insets(20));
+        setPrefWidth(350);
 
         // setting colour to white
-        container.setBackground(
+        setBackground(
                 new Background(new BackgroundFill(Color.WHITE, new CornerRadii(15), Insets.EMPTY))
         );
 
-        container.setBorder(
+        setBorder(
                 new Border(new BorderStroke(Color.LIGHTGRAY,
                         BorderStrokeStyle.SOLID,
                         new CornerRadii(15),
                         new BorderWidths(1)))
         );
 
-        container.setEffect(new DropShadow(10, Color.gray(0, 0.2)));
+        setEffect(new DropShadow(10, Color.gray(0, 0.2)));
 
-        return container;
+    }
+    public void refreshFilters(){
+        if (treeFilterPanel != null) {
+            treeFilterPanel.refreshVisibility();
+        }
     }
 }
