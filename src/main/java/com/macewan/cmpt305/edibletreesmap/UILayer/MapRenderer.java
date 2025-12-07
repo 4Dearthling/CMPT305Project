@@ -58,16 +58,24 @@ public class MapRenderer {
 
     /**
      * Draws tree clusters on the map.
-     * Single-tree clusters are drawn as individual markers.
-     * Multi-tree clusters are drawn as colored circles with counts.
+     * Single-tree clusters are drawn as individual markers only when fully zoomed in.
+     * Otherwise, all clusters (including single-tree) are drawn as bubbles with counts.
      *
      * @param clusters List of tree clusters to draw
      */
     public void drawClusters(List<TreeCluster> clusters) {
+        drawClusters(clusters, false);
+    }
+
+    /**
+     * Draws tree clusters on the map.
+     *
+     * @param clusters List of tree clusters to draw
+     * @param showIndividualTrees If true, single-tree clusters show as colored dots; if false, show as bubbles with "1"
+     */
+    public void drawClusters(List<TreeCluster> clusters, boolean showIndividualTrees) {
         // Clear existing graphics
         treeGraphicsManager.clear();
-
-
 
         // Draw each cluster
         for (TreeCluster cluster : clusters) {
@@ -77,13 +85,12 @@ public class MapRenderer {
                 continue; // Skip empty clusters
             }
 
-            if (cluster.getTreeCount() == 1) {
-                // Single tree - draw as individual marker
+            if (cluster.getTreeCount() == 1 && showIndividualTrees) {
+                // Single tree at full zoom - draw as individual marker
                 EdibleTree singleTree = cluster.getTrees().getFirst();
                 drawIndividualTrees(singleTree);
-                //drawIndividualTree(singleTree);
             } else {
-                // Multiple trees - draw as cluster
+                // Draw as cluster bubble (including single-tree clusters when not fully zoomed)
                 drawCluster(centerPoint, cluster.getTreeCount());
             }
         }
@@ -108,16 +115,16 @@ public class MapRenderer {
         double size;
 
         if (count < 10) {
-            color = Color.rgb(50, 205, 50); // Green
+            color = Color.rgb(42, 157, 143);
             size = 20;
         } else if (count < 50) {
-            color = Color.rgb(255, 215, 0); // Yellow
+            color = Color.rgb(233, 196, 106);
             size = 30;
         } else if (count < 100) {
-            color = Color.rgb(255, 140, 0); // Orange
+            color = Color.rgb(244, 162, 97);
             size = 40;
         } else {
-            color = Color.rgb(220, 20, 60); // Red
+            color = Color.rgb(231, 111, 81);
             size = 50;
         }
 
@@ -130,13 +137,12 @@ public class MapRenderer {
 
         // Create text label showing tree count
         TextSymbol textSymbol = new TextSymbol(
-                14,                                      // font size
+                13,                                 // font size
                 String.valueOf(count),                   // text
                 Color.WHITE,                             // color
                 TextSymbol.HorizontalAlignment.CENTER,
                 TextSymbol.VerticalAlignment.MIDDLE
         );
-        textSymbol.setHaloColor(Color.BLACK);            // Black outline for readability
         textSymbol.setHaloWidth(1);
 
         // Combine circle and text into composite symbol
