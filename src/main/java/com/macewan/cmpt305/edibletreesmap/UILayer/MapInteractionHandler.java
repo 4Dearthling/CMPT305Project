@@ -26,7 +26,7 @@ public class MapInteractionHandler {
     private final Callout callout;
     private final EdibleTrees edibleTrees;
     private List<TreeCluster> clusters;
-    private final PauseTransition hoverPause = new PauseTransition(Duration.millis(250));
+    private final PauseTransition hoverPause = new PauseTransition(Duration.millis(200));
     private Point2D lastPoint;
 
     public MapInteractionHandler(MapView mapView, EdibleTrees edibleTrees) {
@@ -40,6 +40,10 @@ public class MapInteractionHandler {
     private void calloutHoverListener() {
         // When hover pause timer finishes, show callout for tree at last position
         hoverPause.setOnFinished(event -> {
+            // Only show callout when displaying individual trees (not clustered)
+            if (clusters == null || clusters.size() != edibleTrees.getSize()) {
+                return;
+            }
             if (lastPoint == null) {
                 return;
             }
