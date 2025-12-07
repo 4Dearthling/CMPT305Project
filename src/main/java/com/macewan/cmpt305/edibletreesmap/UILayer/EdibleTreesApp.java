@@ -34,8 +34,6 @@ public class EdibleTreesApp extends Application {
     private MapInteractionHandler mapInteractionHandler;
     private SidePanel sidePanel;
 
-    // Data
-    private static EdibleTrees edibleTrees;
 
     // Edmonton coordinates (City Centre)
     private static final double EDMONTON_LATITUDE = 53.5461;
@@ -65,6 +63,7 @@ public class EdibleTreesApp extends Application {
 
         // Initialize the map
         initializeMap();
+
 
         // Create Graphics Manager
         TreeGraphicsManager graphicsManager = new TreeGraphicsManager(graphicsOverlay);
@@ -172,14 +171,12 @@ public class EdibleTreesApp extends Application {
 
                 // Update map on JavaFX thread
                 javafx.application.Platform.runLater(() -> {
-                    if (edibleTrees != null) {
-                        mapInteractionHandler = new MapInteractionHandler(mapView, treeMapService.getEdibleTrees());
-                        treeMapService.setMapInteractionHandler(mapInteractionHandler);
-                        treeMapService.refreshClusters();
+                    treeMapService.refreshClusters();
+                    mapInteractionHandler = new MapInteractionHandler(mapView, treeMapService.getEdibleTrees());
+                    treeMapService.setMapInteractionHandler(mapInteractionHandler);
 
-                        // Refreshes filters after trees are rendered
-                        sidePanel.refreshFilters();
-                    }
+                    // Refreshes filters after trees are rendered
+                    sidePanel.refreshFilters();
                 });
             } catch (IOException e) {
                 System.err.println("Error loading data: " + e.getMessage());

@@ -13,6 +13,8 @@ import javafx.scene.input.MouseButton;
 
 import java.util.List;
 
+import static javafx.scene.input.MouseEvent.MOUSE_CLICKED;
+
 public class MapInteractionHandler {
     /*
     * Anything that the user does is dealt with here
@@ -26,14 +28,20 @@ public class MapInteractionHandler {
             this.mapView = mapView;
             this.callout = mapView.getCallout();
             this.edibleTrees = edibleTrees;
-            calloutListener();
+            //calloutListener();
 
         }
 
         private void calloutListener() {
+
             mapView.setOnMouseClicked(event -> {
+                System.out.println("=== CLICK DETECTED ===");
+                System.out.println("Clusters: " + (clusters == null ? "null" : clusters.size()));
+                System.out.println("Trees: " + edibleTrees.getSize());
+                System.out.println("Match: " + (clusters != null && clusters.size() == edibleTrees.getSize()));
+
                 // checks if there is no clustering, if the user click was from the primary mouse button and user is not panning
-                if (clusters.size() == edibleTrees.getSize() && event.getButton() == MouseButton.PRIMARY && event.isStillSincePress()) {
+                if (clusters != null && clusters.size() == edibleTrees.getSize() && event.getButton() == MouseButton.PRIMARY && event.isStillSincePress()) {
                     handleTreeClick(event.getX(), event.getY());
                     // Convert mouse click to usable point on mapView
 
