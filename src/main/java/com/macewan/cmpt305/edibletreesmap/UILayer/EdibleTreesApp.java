@@ -96,53 +96,6 @@ public class EdibleTreesApp extends Application {
     
     }
 
-//    private VBox createSidePanel() {
-//        VBox sidePane = getVBox();
-//
-//        // Title
-//        Label title = new Label("Edmonton Edible Trees");
-//        title.setFont(Font.font("System", FontWeight.BOLD, 18));
-//
-//        // filter section (moved into TreeFilterPanel)
-//        TreeFilterPanel filterBox = new TreeFilterPanel(fruitGraphics);
-//
-//        // Add refresh button
-//        Button refreshButton = new Button("Refresh Clusters");
-//        refreshButton.setStyle("-fx-font-size: 14px; -fx-padding: 10;");
-//        refreshButton.setMaxWidth(Double.MAX_VALUE);
-//        refreshButton.setOnAction(e -> refreshClusters());
-//
-//        sidePane.getChildren().addAll(title, filterBox, refreshButton);
-//
-//        return sidePane;
-//    }
-//
-//    /**
-//     * Setting a sidebar for the filtering
-//     */
-//    private static VBox getVBox() {
-//
-//        VBox container = new VBox(20); //creating side panel box
-//        container.setPadding(new Insets(20));
-//        container.setPrefWidth(350);
-//
-//        // setting colour to white
-//        container.setBackground(
-//                new Background(new BackgroundFill(Color.WHITE, new CornerRadii(15), Insets.EMPTY))
-//        );
-//
-//        container.setBorder(
-//                new Border(new BorderStroke(Color.LIGHTGRAY,
-//                        BorderStrokeStyle.SOLID,
-//                        new CornerRadii(15),
-//                        new BorderWidths(1)))
-//        );
-//
-//        container.setEffect(new DropShadow(10, Color.gray(0, 0.2)));
-//
-//        return container;
-//    }
-
 
     /**
      * Initializes the ArcGIS map view centered on Edmonton

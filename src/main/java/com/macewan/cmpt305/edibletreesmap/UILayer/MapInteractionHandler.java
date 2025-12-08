@@ -32,7 +32,6 @@ public class MapInteractionHandler {
     private RadiusSlider radiusSlider;
     private MapRenderer mapRenderer;
     private Point radiusCenter;
-    private boolean radiusListenerInitialized = false;
     private TreePieChart pieChart;
 
     public MapInteractionHandler(MapView mapView, EdibleTrees edibleTrees, RadiusSlider radiusSlider, MapRenderer mapRenderer) {

@@ -21,10 +21,10 @@ public class SidePanel extends VBox{
         * */
         super(20);
         applyStyles();
-        buildUI(refreshCluster, treeGraphicsManager, radiusSlider, pieChart);
+        buildUI(pieChart, radiusSlider, treeGraphicsManager,refreshCluster );
     }
 
-    private void buildUI(Consumer<Set<String>> refreshCluster, TreeGraphicsManager treeGraphicsManager, RadiusSlider radiusSlider, TreePieChart pieChart) {
+    private void buildUI(TreePieChart pieChart, RadiusSlider radiusSlider, TreeGraphicsManager treeGraphicsManager, Consumer<Set<String>> refreshCluster) {
         // Title
         javafx.scene.control.Label title = new javafx.scene.control.Label("Edmonton Edible Trees");
         title.setFont(Font.font("System", FontWeight.BOLD, 18));
@@ -34,9 +34,7 @@ public class SidePanel extends VBox{
         treeFilterPanel = new TreeFilterPanel(treeGraphicsManager);
 
         // Update pie chart when filter checkboxes change
-        treeFilterPanel.setOnFilterChange(enabledTypes -> {
-            pieChart.setEnabledFruitTypes(enabledTypes);
-        });
+        treeFilterPanel.setOnFilterChange(pieChart::setEnabledFruitTypes);
 
         // Initialize pie chart with current filter state
         pieChart.setEnabledFruitTypes(treeFilterPanel.getEnabledFruitTypes());
@@ -47,7 +45,8 @@ public class SidePanel extends VBox{
         refreshButton.setMaxWidth(Double.MAX_VALUE);
         refreshButton.setOnAction(e -> refreshCluster.accept(treeFilterPanel.getEnabledFruitTypes()));
 
-        getChildren().addAll(title, treeFilterPanel, refreshButton, radiusSlider, pieChart);
+        getChildren().addAll(title, pieChart, radiusSlider, treeFilterPanel, refreshButton );
+        VBox.setVgrow(pieChart, Priority.ALWAYS);
 
     }
 
