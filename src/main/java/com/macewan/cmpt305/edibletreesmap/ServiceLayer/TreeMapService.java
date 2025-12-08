@@ -96,10 +96,13 @@ public class TreeMapService {
         boolean showIndividualTrees = (clusterDistance == 0);
         mapRenderer.drawClusters(clusters, showIndividualTrees);
 
+        // Clear the radius circle when refreshing clusters
+        mapRenderer.clearRadius();
 
         if (mapInteractionHandler != null) {
             mapInteractionHandler.clearCallout();
             mapInteractionHandler.setCluster(clusters, showIndividualTrees);
+            mapInteractionHandler.clearRadius();
         }
 
         System.out.println("Refreshed clusters at scale " + currentScale +

@@ -15,23 +15,29 @@ public class SidePanel extends VBox{
     private Button refreshButton;
     private TreeFilterPanel treeFilterPanel;
 
-    public SidePanel(Consumer<Set<String>> refreshCluster, TreeGraphicsManager treeGraphicsManager) {
+    public SidePanel(Consumer<Set<String>> refreshCluster, TreeGraphicsManager treeGraphicsManager, RadiusSlider radiusSlider, TreePieChart pieChart) {
         /*
         * Formats the side panel elements
         * */
         super(20);
         applyStyles();
-        buildUI(refreshCluster, treeGraphicsManager);
-        //this.getChildren().add(mainPane);
+        buildUI(pieChart, radiusSlider, treeGraphicsManager,refreshCluster );
     }
 
-    private void buildUI(Consumer<Set<String>> refreshCluster, TreeGraphicsManager treeGraphicsManager) {
+    private void buildUI(TreePieChart pieChart, RadiusSlider radiusSlider, TreeGraphicsManager treeGraphicsManager, Consumer<Set<String>> refreshCluster) {
         // Title
         javafx.scene.control.Label title = new javafx.scene.control.Label("Edmonton Edible Trees");
         title.setFont(Font.font("System", FontWeight.BOLD, 18));
+        title.setTextFill(Color.BLACK);
 
         // filter section (moved into TreeFilterPanel)
         treeFilterPanel = new TreeFilterPanel(treeGraphicsManager);
+
+        // Update pie chart when filter checkboxes change
+        treeFilterPanel.setOnFilterChange(pieChart::setEnabledFruitTypes);
+
+        // Initialize pie chart with current filter state
+        pieChart.setEnabledFruitTypes(treeFilterPanel.getEnabledFruitTypes());
 
         // Add refresh button
         refreshButton = new Button("Refresh Clusters");
@@ -39,7 +45,8 @@ public class SidePanel extends VBox{
         refreshButton.setMaxWidth(Double.MAX_VALUE);
         refreshButton.setOnAction(e -> refreshCluster.accept(treeFilterPanel.getEnabledFruitTypes()));
 
-        getChildren().addAll(title, treeFilterPanel, refreshButton);
+        getChildren().addAll(title, pieChart, radiusSlider, treeFilterPanel, refreshButton );
+        VBox.setVgrow(pieChart, Priority.ALWAYS);
 
     }
 
@@ -68,4 +75,5 @@ public class SidePanel extends VBox{
             treeFilterPanel.refreshVisibility();
         }
     }
+
 }

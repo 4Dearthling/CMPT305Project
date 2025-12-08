@@ -1,14 +1,12 @@
 package com.macewan.cmpt305.edibletreesmap.UILayer;
 
-import com.esri.arcgisruntime.geometry.Point;
+import com.esri.arcgisruntime.geometry.*;
 import com.esri.arcgisruntime.mapping.view.Graphic;
 import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
-import com.esri.arcgisruntime.symbology.CompositeSymbol;
-import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
-import com.esri.arcgisruntime.symbology.Symbol;
-import com.esri.arcgisruntime.symbology.TextSymbol;
+import com.esri.arcgisruntime.symbology.*;
 import com.macewan.cmpt305.edibletreesmap.DataObjectsLayer.EdibleTree;
 import com.macewan.cmpt305.edibletreesmap.DataObjectsLayer.TreeCluster;
+import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
@@ -23,7 +21,9 @@ public class MapRenderer {
     */
 
     private final GraphicsOverlay graphicsOverlay;
+    private final GraphicsOverlay radiusOverlay; // Separate overlay for radius so it doesn't get cleared
     private final TreeGraphicsManager treeGraphicsManager;
+    private Graphic circleGraphic;
 
     /**
      * Creates a new MapRenderer
@@ -31,8 +31,9 @@ public class MapRenderer {
      * @param graphicsOverlay The graphics overlay to draw on
      * @param treeGraphicsManager A graphics manager ot manage all the individual tree graphics
      */
-    public MapRenderer(TreeGraphicsManager treeGraphicsManager, GraphicsOverlay graphicsOverlay) {
+    public MapRenderer(TreeGraphicsManager treeGraphicsManager, GraphicsOverlay graphicsOverlay, GraphicsOverlay radiusOverlay) {
         this.graphicsOverlay = graphicsOverlay;
+        this.radiusOverlay = radiusOverlay;
         this.treeGraphicsManager = treeGraphicsManager;
     }
 
@@ -156,6 +157,63 @@ public class MapRenderer {
         graphicsOverlay.getGraphics().add(graphic);
     }
 
+    public void drawRadius(Point radiusCenter, double radius) {
+        // Remove existing radius graphic if present
+        if (circleGraphic != null) {
+            radiusOverlay.getGraphics().remove(circleGraphic);
+        }
+
+        // Create a geodesic circle geometry
+        Geometry radiusGeometry = createRadiusGeometry(radiusCenter, radius);
+
+        if (radiusGeometry == null) {
+            System.out.println("ERROR: radiusGeometry is null");
+            return;
+        }
+
+        // Create a semi-transparent fill with an outline
+        // Colors in ARGB integer format: 0xAARRGGBB
+        SimpleLineSymbol outlineSymbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, 0xFFFF0000, 2); // Solid red outline
+        SimpleFillSymbol fillSymbol = new SimpleFillSymbol(SimpleFillSymbol.Style.SOLID, 0x33FF0000, outlineSymbol); // Semi-transparent red fill
+
+        circleGraphic = new Graphic(radiusGeometry, fillSymbol);
+        radiusOverlay.getGraphics().add(circleGraphic);
+        System.out.println("drawRadius called - radius: " + radius + ", center: " + radiusCenter);
+    }
+
+    public void updateRadius(Point radiusCenter, double radius) {
+        if (circleGraphic == null) {
+            return;
+        }
+        Geometry radiusGeometry = createRadiusGeometry(radiusCenter, radius);
+        circleGraphic.setGeometry(radiusGeometry);
+    }
+
+    private Geometry createRadiusGeometry(Point center, double radius) {
+        // Use bufferGeodetic to create a circle around the center point
+        // This is more reliable than sectorGeodesic for simple circles
+        return GeometryEngine.bufferGeodetic(
+                center,
+                radius,
+                new LinearUnit(LinearUnitId.METERS),
+                Double.NaN,  // maxDeviation - use default
+                GeodeticCurveType.GEODESIC
+        );
+    }
+
+    public Graphic getCircleGraphic() {
+        return circleGraphic;
+    }
+
+    /**
+     * Clears the radius circle from the map
+     */
+    public void clearRadius() {
+        if (circleGraphic != null) {
+            radiusOverlay.getGraphics().remove(circleGraphic);
+            circleGraphic = null;
+        }
+    }
 
     /**
      * Clears all graphics from the map
