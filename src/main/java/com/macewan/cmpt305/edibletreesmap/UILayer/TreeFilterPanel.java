@@ -3,6 +3,7 @@ package com.macewan.cmpt305.edibletreesmap.UILayer;
 import javafx.geometry.Insets;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TitledPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -66,6 +67,7 @@ public class TreeFilterPanel extends VBox {
         // label for the filtering on side panel
         Label label = new Label("Filter by Tree Type");
         label.setFont(Font.font("System", FontWeight.BOLD, 16));
+        label.setTextFill(Color.BLACK);
 
         // clickable bulk actions
         selectAllLabel = new Label("Select All");
@@ -145,9 +147,9 @@ public class TreeFilterPanel extends VBox {
         addListener(hackberryCheckBox);
         addListener(caraganaCheckBox);
 
-        VBox box = new VBox(
+        // VBox containing all the checkboxes
+        VBox checkboxContainer = new VBox(
                 10,
-                headerRow,
                 appleCheckBox,
                 cherryCheckBox,
                 crabappleCheckBox,
@@ -165,6 +167,15 @@ public class TreeFilterPanel extends VBox {
                 hackberryCheckBox,
                 caraganaCheckBox
         );
+        checkboxContainer.setPadding(new Insets(10));
+
+        // Wrap checkboxes in a collapsible TitledPane (dropdown)
+        TitledPane dropdown = new TitledPane("Tree Types", checkboxContainer);
+        dropdown.setExpanded(false); // Start collapsed
+        dropdown.setAnimated(true);
+
+        // Container with header and dropdown
+        VBox box = new VBox(10, headerRow, dropdown);
 
         // initialize the Select all or Select none method
         updateBulkSelectState();

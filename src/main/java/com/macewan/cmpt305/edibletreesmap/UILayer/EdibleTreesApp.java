@@ -13,6 +13,7 @@ import com.macewan.cmpt305.edibletreesmap.DataObjectsLayer.EdibleTrees;
 import com.macewan.cmpt305.edibletreesmap.ServiceLayer.TreeMapService;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.control.Slider;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -30,9 +31,13 @@ public class EdibleTreesApp extends Application {
     // Map components
     private MapView mapView;
     private GraphicsOverlay graphicsOverlay;
+    private GraphicsOverlay radiusOverlay;
     private TreeMapService treeMapService;
     private MapInteractionHandler mapInteractionHandler;
     private SidePanel sidePanel;
+    private RadiusSlider radiusSlider;
+    private TreePieChart pieChart;
+    private MapRenderer mapRenderer;
 
 
     // Edmonton coordinates (City Centre)
@@ -65,15 +70,19 @@ public class EdibleTreesApp extends Application {
         initializeMap();
 
 
+
         // Create Graphics Manager
         TreeGraphicsManager graphicsManager = new TreeGraphicsManager(graphicsOverlay);
 
         // Initialize renderer (needs graphics overlay)
-        MapRenderer mapRenderer = new MapRenderer(graphicsManager, graphicsOverlay);
+        mapRenderer = new MapRenderer(graphicsManager, graphicsOverlay, radiusOverlay);
         treeMapService = new TreeMapService(mapView, mapRenderer);
 
+        radiusSlider = new RadiusSlider();
+        pieChart = new TreePieChart();
+
         // Build UI
-        sidePanel = new SidePanel(treeMapService::refreshClusters, graphicsManager);
+        sidePanel = new SidePanel(treeMapService::refreshClusters, graphicsManager, radiusSlider, pieChart);
         MainLayout layout = new MainLayout(mapView, sidePanel);
 
 
@@ -156,7 +165,9 @@ public class EdibleTreesApp extends Application {
         mapView.setViewpoint(new Viewpoint(edmontonPoint, INITIAL_SCALE));
 
         graphicsOverlay = new GraphicsOverlay();
+        radiusOverlay = new GraphicsOverlay();
         mapView.getGraphicsOverlays().add(graphicsOverlay);
+        mapView.getGraphicsOverlays().add(radiusOverlay); // Radius on top
     }
 
     /**
@@ -171,9 +182,14 @@ public class EdibleTreesApp extends Application {
 
                 // Update map on JavaFX thread
                 javafx.application.Platform.runLater(() -> {
-                    treeMapService.refreshClusters();
-                    mapInteractionHandler = new MapInteractionHandler(mapView, treeMapService.getEdibleTrees());
+                    // Create interaction handler BEFORE refreshClusters so it receives the cluster state
+                    mapInteractionHandler = new MapInteractionHandler(mapView, treeMapService.getEdibleTrees(), radiusSlider, mapRenderer);
                     treeMapService.setMapInteractionHandler(mapInteractionHandler);
+
+                    // Connect pie chart to interaction handler
+                    mapInteractionHandler.setPieChart(pieChart);
+
+                    treeMapService.refreshClusters();
 
                     // Refreshes filters after trees are rendered
                     sidePanel.refreshFilters();

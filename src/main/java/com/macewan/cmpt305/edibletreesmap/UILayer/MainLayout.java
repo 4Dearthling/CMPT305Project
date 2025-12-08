@@ -1,6 +1,7 @@
 package com.macewan.cmpt305.edibletreesmap.UILayer;
 
 import com.esri.arcgisruntime.mapping.view.MapView;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
 
 public class MainLayout extends HBox {
@@ -18,13 +19,17 @@ public class MainLayout extends HBox {
 
 
     private void buildLayout() {
-//        HBox mainWindow = new HBox();
+        // Wrap side panel in a ScrollPane to make it scrollable
+        ScrollPane scrollPane = new ScrollPane(sidePanel);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        // Remove default ScrollPane background styling
+        scrollPane.setStyle("-fx-background: white; -fx-background-color: white;");
+        scrollPane.setPrefWidth(370);
 
-        getChildren().addAll(mapView, sidePanel);
+        getChildren().addAll(mapView, scrollPane);
         HBox.setHgrow(mapView, Priority.ALWAYS);
-        //HBox.setHgrow(sidePanel, Priority.ALWAYS);
-        //getChildren().add(mainWindow);
-
     }
 
 
