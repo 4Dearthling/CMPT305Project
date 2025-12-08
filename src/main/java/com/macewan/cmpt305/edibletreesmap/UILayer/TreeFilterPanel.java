@@ -9,6 +9,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Consumer;
+
 public class TreeFilterPanel extends VBox {
     /*
     * The checkout boxes in the side panel is dealt with here
@@ -37,6 +41,7 @@ public class TreeFilterPanel extends VBox {
     // reference to fruitGraphics from the app
     //private final Map<String, List<Graphic>> fruitGraphics;
     private final TreeGraphicsManager treeGraphicsManager;
+    private Consumer<Set<String>> onFilterChange;
 
     public TreeFilterPanel(TreeGraphicsManager treeGraphicsManager) {
         super(10);
@@ -44,6 +49,10 @@ public class TreeFilterPanel extends VBox {
         setPadding(new Insets(0));
         buildUI();
         updateBulkSelectState();
+    }
+
+    public void setOnFilterChange(Consumer<Set<String>> onFilterChange) {
+        this.onFilterChange = onFilterChange;
     }
 
     private void updateFruitVisibility(){
@@ -167,6 +176,9 @@ public class TreeFilterPanel extends VBox {
         cb.selectedProperty().addListener((obs, o, n) -> {
             updateFruitVisibility();
             updateBulkSelectState();
+            if (onFilterChange != null) {
+                onFilterChange.accept(getEnabledFruitTypes());
+            }
         });
     }
 
@@ -286,5 +298,29 @@ public class TreeFilterPanel extends VBox {
 
     public void refreshVisibility(){
         updateFruitVisibility();
+    }
+
+    /**
+     * Returns the set of fruit types that are currently enabled (checked) in the filter.
+     */
+    public Set<String> getEnabledFruitTypes() {
+        Set<String> enabled = new HashSet<>();
+        if (appleCheckBox != null && appleCheckBox.isSelected()) enabled.add("apple");
+        if (cherryCheckBox != null && cherryCheckBox.isSelected()) enabled.add("cherry");
+        if (crabappleCheckBox != null && crabappleCheckBox.isSelected()) enabled.add("crabapple");
+        if (plumCheckBox != null && plumCheckBox.isSelected()) enabled.add("plum");
+        if (pearCheckBox != null && pearCheckBox.isSelected()) enabled.add("pear");
+        if (chokeCherryCheckBox != null && chokeCherryCheckBox.isSelected()) enabled.add("chokecherry");
+        if (acornCheckBox != null && acornCheckBox.isSelected()) enabled.add("acorn");
+        if (hawthornCheckBox != null && hawthornCheckBox.isSelected()) enabled.add("hawthorn");
+        if (juniperCheckBox != null && juniperCheckBox.isSelected()) enabled.add("juniper");
+        if (butternutCheckBox != null && butternutCheckBox.isSelected()) enabled.add("butternut");
+        if (saskatoonCheckbox != null && saskatoonCheckbox.isSelected()) enabled.add("saskatoon");
+        if (russianOliveCheckbox != null && russianOliveCheckbox.isSelected()) enabled.add("russian olive");
+        if (coffeeTreeCheckBox != null && coffeeTreeCheckBox.isSelected()) enabled.add("coffeetree pod");
+        if (walnutCheckBox != null && walnutCheckBox.isSelected()) enabled.add("walnut");
+        if (hackberryCheckBox != null && hackberryCheckBox.isSelected()) enabled.add("hackberry");
+        if (caraganaCheckBox != null && caraganaCheckBox.isSelected()) enabled.add("caragana flower/pod");
+        return enabled;
     }
 }

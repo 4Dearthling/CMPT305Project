@@ -8,11 +8,14 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.control.Button;
 
+import java.util.Set;
+import java.util.function.Consumer;
+
 public class SidePanel extends VBox{
     private Button refreshButton;
     private TreeFilterPanel treeFilterPanel;
 
-    public SidePanel(Runnable refreshCluster, TreeGraphicsManager treeGraphicsManager) {
+    public SidePanel(Consumer<Set<String>> refreshCluster, TreeGraphicsManager treeGraphicsManager) {
         /*
         * Formats the side panel elements
         * */
@@ -22,7 +25,7 @@ public class SidePanel extends VBox{
         //this.getChildren().add(mainPane);
     }
 
-    private void buildUI(Runnable refreshCluster, TreeGraphicsManager treeGraphicsManager) {
+    private void buildUI(Consumer<Set<String>> refreshCluster, TreeGraphicsManager treeGraphicsManager) {
         // Title
         javafx.scene.control.Label title = new javafx.scene.control.Label("Edmonton Edible Trees");
         title.setFont(Font.font("System", FontWeight.BOLD, 18));
@@ -34,7 +37,7 @@ public class SidePanel extends VBox{
         refreshButton = new Button("Refresh Clusters");
         refreshButton.setStyle("-fx-font-size: 14px; -fx-padding: 10;");
         refreshButton.setMaxWidth(Double.MAX_VALUE);
-        refreshButton.setOnAction(e -> refreshCluster.run());
+        refreshButton.setOnAction(e -> refreshCluster.accept(treeFilterPanel.getEnabledFruitTypes()));
 
         getChildren().addAll(title, treeFilterPanel, refreshButton);
 
