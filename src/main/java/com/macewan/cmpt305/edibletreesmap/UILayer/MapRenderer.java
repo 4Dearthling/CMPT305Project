@@ -77,6 +77,7 @@ public class MapRenderer {
     public void drawClusters(List<TreeCluster> clusters, boolean showIndividualTrees) {
         // Clear existing graphics
         treeGraphicsManager.clear();
+        clear();
 
         // Draw each cluster
         for (TreeCluster cluster : clusters) {
